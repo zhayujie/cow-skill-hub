@@ -1,0 +1,327 @@
+---
+import Base from '@/layouts/Base.astro';
+import { skills, formatDownloads, providers } from '@/data/skills';
+import type { SkillData } from '@/data/skills';
+
+export function getStaticPaths() {
+  return skills.map(skill => ({
+    params: { name: skill.name },
+    props: { skill },
+  }));
+}
+
+interface Props {
+  skill: SkillData;
+}
+
+const { skill } = Astro.props;
+
+const categoryLabel: Record<string, string> = {
+  official: '官方推荐',
+  community: '社区贡献',
+  external: '第三方',
+};
+
+const categoryColor: Record<string, string> = {
+  official: 'bg-primary/10 text-primary border-primary/20',
+  community: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  external: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+};
+
+const provider = providers[skill.sourceProvider];
+const isGithub = skill.sourceType === 'github';
+const isRegistry = skill.sourceType === 'registry';
+const isExternal = isGithub || isRegistry;
+
+function getInstallCommand(skill: SkillData): string {
+  if (isGithub && skill.sourceUrl) {
+    return `cow skill install github:${skill.sourceUrl}${skill.sourcePath ? '#' + skill.sourcePath : ''}`;
+  }
+  if (isRegistry && skill.sourceProvider === 'clawhub') {
+    return `cow skill install clawhub:${skill.sourceUrl || skill.name}`;
+  }
+  return `cow skill install ${skill.name}`;
+}
+
+const installCmd = getInstallCommand(skill);
+const displaySummary = skill.summary || skill.description;
+---
+
+<Base title={skill.displayName} description={skill.description}>
+  <section class="pt-10 px-6">
+    <div class="max-w-content mx-auto">
+      <!-- Breadcrumb -->
+      <nav class="mb-8 text-sm text-gray-500">
+        <a href="/" class="hover:text-gray-300 transition-colors">Skills</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-300">{skill.displayName}</span>
+      </nav>
+
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <h1 class="text-3xl font-bold text-gray-100">{skill.displayName}</h1>
+            <span class={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
+              {categoryLabel[skill.category]}
+            </span>
+            {provider && skill.sourceProvider !== 'cowagent' && (
+              <span class={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${provider.color}`}>
+                {provider.label}
+              </span>
+            )}
+          </div>
+          <p class="text-gray-400 text-base leading-relaxed max-w-2xl mb-4">{displaySummary}</p>
+          <div class="flex items-center gap-5 text-sm text-gray-500">
+            <span class="flex items-center gap-1.5">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              {skill.author}
+            </span>
+            <span>v{skill.version}</span>
+            <span class="flex items-center gap-1">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              {formatDownloads(skill.downloads)} 次安装
+            </span>
+            {skill.platforms.length < 3 && (
+              <span title={skill.platforms.join(', ')}>
+                {skill.platforms.map(p => p === 'darwin' ? 'macOS' : p === 'linux' ? 'Linux' : 'Windows').join(' / ')}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <!-- Install card -->
+        <div class="shrink-0 bg-surface-card border border-border rounded-xl p-5 w-full sm:w-80">
+          <p class="text-xs text-gray-500 mb-2">安装命令</p>
+          <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-2.5 mb-4">
+            <code class="text-sm font-mono text-gray-300 truncate">
+              <span class="text-primary">$</span> {installCmd}
+            </code>
+            <button
+              id="copyBtn"
+              data-command={installCmd}
+              class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0 ml-2"
+              aria-label="Copy"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+              </svg>
+            </button>
+          </div>
+
+          {isGithub && skill.sourceUrl && (
+            <a
+              href={`https://github.com/${skill.sourceUrl}`}
+              target="_blank"
+              class="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition-colors mb-3"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              {skill.sourceUrl}
+              {skill.sourcePath && <span class="text-gray-600">/{skill.sourcePath}</span>}
+            </a>
+          )}
+
+          {isRegistry && skill.homepage && (
+            <a
+              href={skill.homepage}
+              target="_blank"
+              class="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition-colors mb-3"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              查看源平台
+            </a>
+          )}
+
+          {skill.requiresEnv.length > 0 && (
+            <div class="mb-3">
+              <p class="text-xs text-gray-500 mb-1.5">需要环境变量</p>
+              <div class="flex flex-wrap gap-1.5">
+                {skill.requiresEnv.map(env => (
+                  <code class="text-xs bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded px-2 py-0.5">{env}</code>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {skill.requiresBins.length > 0 && (
+            <div class="mb-3">
+              <p class="text-xs text-gray-500 mb-1.5">需要工具</p>
+              <div class="flex flex-wrap gap-1.5">
+                {skill.requiresBins.map(bin => (
+                  <code class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded px-2 py-0.5">{bin}</code>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div class="flex flex-wrap gap-1.5 mt-3">
+            {skill.tags.map(tag => (
+              <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Only show tabs for skills with content */}
+      {skill.skillMd ? (
+        <>
+          <!-- Tabs -->
+          <div class="border-b border-border mb-8">
+            <div class="flex gap-0">
+              <button data-tab="readme" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-primary text-primary cursor-pointer">概述</button>
+              {skill.files.length > 0 && (
+                <button data-tab="files" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors cursor-pointer">文件</button>
+              )}
+            </div>
+          </div>
+
+          <!-- Tab: README -->
+          <div id="tab-readme" class="tab-content">
+            <div id="markdownContent" class="prose prose-invert prose-sm max-w-none
+              prose-headings:text-gray-200 prose-headings:font-semibold
+              prose-p:text-gray-400 prose-p:leading-relaxed
+              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+              prose-code:text-primary prose-code:bg-surface-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+              prose-pre:bg-surface-card prose-pre:border prose-pre:border-border prose-pre:rounded-xl
+              prose-li:text-gray-400
+              prose-strong:text-gray-300
+              prose-hr:border-border
+            ">
+              <p class="text-gray-500">Loading...</p>
+            </div>
+          </div>
+
+          <!-- Tab: Files -->
+          {skill.files.length > 0 && (
+            <div id="tab-files" class="tab-content hidden">
+              <div class="bg-surface-card border border-border rounded-xl overflow-hidden">
+                {skill.files.map((file, idx) => (
+                  <div class:list={['border-border', idx > 0 ? 'border-t' : '']}>
+                    <button
+                      data-file-idx={idx}
+                      class="file-toggle w-full flex items-center justify-between px-5 py-3 hover:bg-surface-card-hover transition-colors cursor-pointer text-left"
+                    >
+                      <div class="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+                          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        <span class="text-sm text-gray-300 font-mono">{file.path}</span>
+                      </div>
+                      <span class="text-xs text-gray-600">{file.size} B</span>
+                    </button>
+                    <div data-file-content={idx} class="hidden">
+                      <pre class="px-5 py-4 text-sm font-mono text-gray-400 bg-surface overflow-x-auto border-t border-border leading-relaxed"><code>{file.path === 'SKILL.md' ? skill.skillMd : file.content}</code></pre>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <!-- External skill with no local content -->
+        <div class="bg-surface-card border border-border rounded-xl p-10 text-center">
+          <p class="text-gray-500 mb-4">此技能由第三方平台提供，CowAgent 可通过 CLI 直接安装使用。</p>
+          {skill.homepage && (
+            <a
+              href={skill.homepage}
+              target="_blank"
+              class="inline-flex items-center gap-2 text-primary hover:underline"
+            >
+              前往源平台查看详情
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          )}
+        </div>
+      )}
+
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ skillMd: skill.skillMd }}>
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('border-primary', 'text-primary');
+          b.classList.add('border-transparent', 'text-gray-500');
+        });
+        btn.classList.remove('border-transparent', 'text-gray-500');
+        btn.classList.add('border-primary', 'text-primary');
+
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+      });
+    });
+
+    // File expand/collapse
+    document.querySelectorAll('.file-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const content = document.querySelector(`[data-file-content="${btn.dataset.fileIdx}"]`);
+        content.classList.toggle('hidden');
+      });
+    });
+
+    // Copy install command
+    const copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(this.dataset.command);
+      });
+    }
+
+    // Render Markdown
+    if (skillMd) {
+      const container = document.getElementById('markdownContent');
+      let content = skillMd;
+
+      if (content.startsWith('---')) {
+        const endIdx = content.indexOf('---', 3);
+        if (endIdx !== -1) {
+          content = content.substring(endIdx + 3).trim();
+        }
+      }
+
+      let html = content
+        .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
+          `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        .replace(/^- (.+)$/gm, '<li>$1</li>')
+        .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
+        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^---$/gm, '<hr />');
+
+      html = '<p>' + html + '</p>';
+      html = html.replace(/<p>\s*<(h[1-3]|pre|ul|ol|hr)/g, '<$1');
+      html = html.replace(/<\/(h[1-3]|pre|ul|ol)>\s*<\/p>/g, '</$1>');
+      html = html.replace(/<p>\s*<\/p>/g, '');
+
+      container.innerHTML = html;
+    }
+  </script>
+</Base>

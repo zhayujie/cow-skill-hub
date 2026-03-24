@@ -1,0 +1,282 @@
+---
+import Base from '@/layouts/Base.astro';
+import SkillCard from '@/components/SkillCard.astro';
+import { skills, categories, tagOptions } from '@/data/skills';
+
+const featuredSkills = skills.filter(s => s.featured);
+const allSkills = skills;
+---
+
+<Base title="Skill Hub">
+  <!-- Hero -->
+  <section class="pt-20 pb-12 px-6 text-center">
+    <div class="max-w-content mx-auto">
+      <div class="inline-block px-4 py-1.5 bg-primary/8 border border-primary/20 rounded-full text-xs text-primary mb-7 tracking-wide">
+        CowAgent Skill Hub
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-6 bg-gradient-to-br from-white to-gray-400 bg-clip-text text-transparent">
+        发现和安装技能
+      </h1>
+      <p class="max-w-xl mx-auto text-base text-gray-400 leading-relaxed mb-10">
+        浏览官方推荐和社区贡献的 Skills，一行命令即可为你的 CowAgent 扩展新能力
+      </p>
+
+      <!-- Search -->
+      <div class="max-w-lg mx-auto relative mb-6">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="搜索技能名称、描述或标签..."
+          class="w-full pl-11 pr-4 py-3 bg-surface-card border border-border rounded-xl text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors"
+        />
+      </div>
+
+      <!-- Install hint -->
+      <div class="max-w-lg mx-auto bg-surface-card border border-border rounded-xl px-5 py-3 flex items-center justify-between">
+        <code class="text-sm text-gray-400 font-mono">
+          <span class="text-primary">$</span> cow skill install &lt;name&gt;
+        </code>
+        <button
+          id="copyInstallBtn"
+          class="text-xs text-gray-500 hover:text-primary border border-border-light rounded-md px-3 py-1 transition-colors cursor-pointer"
+        >
+          复制
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="px-6 mb-10">
+    <div class="max-w-content mx-auto space-y-3">
+      <!-- Category row -->
+      <div class="flex items-center gap-3 overflow-x-auto pb-1">
+        {categories.map(cat => (
+          <button
+            data-category={cat.id}
+            class:list={[
+              'category-btn px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer whitespace-nowrap',
+              cat.id === 'all'
+                ? 'bg-primary/10 text-primary border-primary/20'
+                : 'bg-surface-card text-gray-400 border-border hover:border-border-light hover:text-gray-300'
+            ]}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+      <!-- Tag row -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        <span class="text-xs text-gray-600 shrink-0">标签</span>
+        {tagOptions.map(tag => (
+          <button
+            data-tag={tag.id}
+            class="tag-btn px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200 cursor-pointer whitespace-nowrap bg-transparent text-gray-500 border-border hover:border-border-light hover:text-gray-300"
+          >
+            {tag.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Grid -->
+  <section class="px-6 pb-20">
+    <div class="max-w-content mx-auto">
+      <div id="skillsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {allSkills.map(skill => (
+          <div data-skill-name={skill.name} data-skill-category={skill.category} data-skill-tags={skill.tags.join(',')} data-skill-provider={skill.sourceProvider}>
+            <SkillCard skill={skill} />
+          </div>
+        ))}
+      </div>
+
+      <div id="emptyState" class="hidden text-center py-20">
+        <svg class="mx-auto mb-4 text-gray-600" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <p class="text-gray-500">未找到匹配的技能</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install Modal -->
+  <div id="installModal" class="fixed inset-0 z-[100] hidden">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modalOverlay"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="relative bg-surface-card border border-border rounded-2xl w-full max-w-md p-8 shadow-2xl">
+        <!-- Close -->
+        <button id="modalClose" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors cursor-pointer">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        <!-- Title -->
+        <h3 id="modalTitle" class="text-lg font-semibold text-gray-200 mb-6"></h3>
+
+        <!-- Install command -->
+        <p class="text-xs text-gray-500 mb-2">安装命令</p>
+        <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-3 mb-6">
+          <code id="modalCmd" class="text-sm font-mono text-gray-300 truncate mr-3"></code>
+          <button id="modalCopyBtn" class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0" aria-label="Copy">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Action button -->
+        <a id="modalExternalBtn" href="#" target="_blank" class="hidden w-full text-center px-4 py-2.5 bg-surface text-gray-400 border border-border rounded-lg text-sm font-medium hover:text-gray-200 hover:border-border-light transition-colors items-center justify-center gap-1.5">
+          前往源平台查看
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    const searchInput = document.getElementById('searchInput');
+    const skillsGrid = document.getElementById('skillsGrid');
+    const emptyState = document.getElementById('emptyState');
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    const tagBtns = document.querySelectorAll('.tag-btn');
+    const skillCards = skillsGrid.querySelectorAll('[data-skill-name]');
+
+    let currentCategory = 'all';
+    const activeTags = new Set();
+
+    const CAT_ACTIVE = 'category-btn px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer whitespace-nowrap bg-primary/10 text-primary border-primary/20';
+    const CAT_INACTIVE = 'category-btn px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 cursor-pointer whitespace-nowrap bg-surface-card text-gray-400 border-border hover:border-border-light hover:text-gray-300';
+    const TAG_ACTIVE = 'tag-btn px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200 cursor-pointer whitespace-nowrap bg-primary/10 text-primary border-primary/20';
+    const TAG_INACTIVE = 'tag-btn px-3 py-1 rounded-md text-xs font-medium border transition-all duration-200 cursor-pointer whitespace-nowrap bg-transparent text-gray-500 border-border hover:border-border-light hover:text-gray-300';
+
+    function filterSkills() {
+      const query = searchInput.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      skillCards.forEach(card => {
+        const name = card.dataset.skillName.toLowerCase();
+        const cat = card.dataset.skillCategory;
+        const tags = card.dataset.skillTags.toLowerCase().split(',').filter(Boolean);
+        const text = card.textContent.toLowerCase();
+
+        const matchCategory = currentCategory === 'all' || cat === currentCategory;
+        const matchSearch = !query || name.includes(query) || tags.some(t => t.includes(query)) || text.includes(query);
+        const matchTags = activeTags.size === 0 || tags.some(t => activeTags.has(t));
+
+        if (matchCategory && matchSearch && matchTags) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      emptyState.classList.toggle('hidden', visibleCount > 0);
+    }
+
+    searchInput.addEventListener('input', filterSkills);
+
+    categoryBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentCategory = btn.dataset.category;
+        categoryBtns.forEach(b => {
+          b.className = b.dataset.category === currentCategory ? CAT_ACTIVE : CAT_INACTIVE;
+        });
+        filterSkills();
+      });
+    });
+
+    tagBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tag = btn.dataset.tag;
+        if (activeTags.has(tag)) {
+          activeTags.delete(tag);
+          btn.className = TAG_INACTIVE;
+        } else {
+          activeTags.add(tag);
+          btn.className = TAG_ACTIVE;
+        }
+        filterSkills();
+      });
+    });
+
+    document.getElementById('copyInstallBtn').addEventListener('click', function() {
+      navigator.clipboard.writeText('cow skill install <name>');
+      this.textContent = '已复制!';
+      this.classList.add('text-primary', 'border-primary/30');
+      setTimeout(() => {
+        this.textContent = '复制';
+        this.classList.remove('text-primary', 'border-primary/30');
+      }, 2000);
+    });
+
+    // --- Install Modal ---
+    const modal = document.getElementById('installModal');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalCmd = document.getElementById('modalCmd');
+    const modalCopyBtn = document.getElementById('modalCopyBtn');
+    const modalExternalBtn = document.getElementById('modalExternalBtn');
+
+    function openModal(card) {
+      const cmd = card.dataset.installCmd;
+      const displayName = card.dataset.skillDisplay;
+      const homepage = card.dataset.homepage;
+
+      modalTitle.textContent = displayName;
+      modalCmd.textContent = cmd;
+
+      if (homepage) {
+        modalExternalBtn.href = homepage;
+        modalExternalBtn.classList.remove('hidden');
+        modalExternalBtn.classList.add('flex');
+      } else {
+        modalExternalBtn.classList.add('hidden');
+        modalExternalBtn.classList.remove('flex');
+      }
+
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.skill-card--external').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal(card);
+      });
+    });
+
+    modalOverlay.addEventListener('click', closeModal);
+    modalClose.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    modalCopyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(modalCmd.textContent);
+      const svg = modalCopyBtn.querySelector('svg');
+      const original = svg.innerHTML;
+      svg.innerHTML = '<polyline points="20 6 9 17 4 12" />';
+      setTimeout(() => { svg.innerHTML = original; }, 1500);
+    });
+  </script>
+</Base>
