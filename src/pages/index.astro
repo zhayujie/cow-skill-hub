@@ -94,7 +94,7 @@ const tags = dbTags.length > 0 ? dbTags : tagOptions;
     <div class="max-w-content mx-auto">
       <div id="skillsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {allSkills.map(skill => (
-          <div data-skill-name={skill.name} data-skill-category={skill.category} data-skill-featured={skill.featured ? '1' : '0'} data-skill-tags={skill.tags.join(',')} data-skill-provider={skill.sourceProvider}>
+          <div class="h-full" data-skill-name={skill.name} data-skill-category={skill.category} data-skill-featured={skill.featured ? '1' : '0'} data-skill-tags={skill.tags.join(',')} data-skill-provider={skill.sourceProvider}>
             <SkillCard skill={skill} />
           </div>
         ))}

@@ -1,10 +1,12 @@
 import type { APIRoute } from 'astro';
+import { json, getDB, parseSkillRow } from '../_utils';
 
 export const GET: APIRoute = async ({ locals, url }) => {
-  const db = (locals as any).runtime?.env?.DB;
-  if (!db) return jsonResp({ error: 'DB not available' }, 500);
+  const db = getDB(locals);
+  if (!db) return json({ error: 'DB not available' }, 500);
 
   const category = url.searchParams.get('category') || 'all';
+  const provider = url.searchParams.get('provider') || 'all';
   const tag = url.searchParams.get('tag') || '';
   const q = url.searchParams.get('q') || '';
   const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -20,10 +22,17 @@ export const GET: APIRoute = async ({ locals, url }) => {
     query += ' AND category = ?';
     params.push(category);
   }
+
+  if (provider !== 'all') {
+    query += ' AND source_provider = ?';
+    params.push(provider);
+  }
+
   if (tag) {
     query += ' AND tags LIKE ?';
     params.push(`%"${tag}"%`);
   }
+
   if (q) {
     query += ' AND (name LIKE ? OR display_name LIKE ? OR description LIKE ?)';
     const p = `%${q}%`;
@@ -33,28 +42,40 @@ export const GET: APIRoute = async ({ locals, url }) => {
   query += ' ORDER BY sort_order ASC, downloads DESC LIMIT ? OFFSET ?';
   params.push(limit, offset);
 
-  const { results } = await db.prepare(query).bind(...params).all();
-  return jsonResp({ skills: results.map(parseRow), page });
+  try {
+    const { results } = await db.prepare(query).bind(...params).all();
+
+    let countQuery = "SELECT COUNT(*) as total FROM skills WHERE status = 'published'";
+    const countParams: unknown[] = [];
+    if (category === 'featured') {
+      countQuery += ' AND featured = 1';
+    } else if (category !== 'all') {
+      countQuery += ' AND category = ?';
+      countParams.push(category);
+    }
+    if (provider !== 'all') {
+      countQuery += ' AND source_provider = ?';
+      countParams.push(provider);
+    }
+    if (tag) {
+      countQuery += ' AND tags LIKE ?';
+      countParams.push(`%"${tag}"%`);
+    }
+    if (q) {
+      countQuery += ' AND (name LIKE ? OR display_name LIKE ? OR description LIKE ?)';
+      const p = `%${q}%`;
+      countParams.push(p, p, p);
+    }
+    const { results: countResults } = await db.prepare(countQuery).bind(...countParams).all();
+
+    return json({
+      skills: results.map(parseSkillRow),
+      total: (countResults[0] as any)?.total || 0,
+      page,
+      limit,
+    });
+  } catch (err: any) {
+    console.error('list skills error:', err);
+    return json({ error: err.message || 'Internal Server Error' }, 500);
+  }
 };
-
-function parseRow(row: Record<string, unknown>) {
-  return {
-    ...row,
-    tags: safeParse(row.tags as string, []),
-    requires_env: safeParse(row.requires_env as string, []),
-    requires_bins: safeParse(row.requires_bins as string, []),
-    platforms: safeParse(row.platforms as string, ['darwin', 'linux', 'windows']),
-    featured: !!(row.featured as number),
-  };
-}
-
-function safeParse(s: string, fallback: unknown) {
-  try { return JSON.parse(s); } catch { return fallback; }
-}
-
-function jsonResp(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-  });
-}
