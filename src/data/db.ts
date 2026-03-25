@@ -31,7 +31,6 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
     sourceProvider: row.source_provider as SkillData['sourceProvider'],
     sourceUrl: row.source_url as string | undefined,
     sourcePath: row.source_path as string | undefined,
-    skillMd: row.skill_md as string || '',
     files: [],
   };
 }

@@ -172,43 +172,34 @@ const displaySummary = skill.summary || skill.description;
         </div>
       </div>
 
-      {(skill.skillMd || skill.files.length > 0) ? (
+      {(displaySummary || skill.files.length > 0) ? (
         <>
           <!-- Tabs -->
           <div class="border-b border-border mb-8">
             <div class="flex gap-0">
-              {skill.skillMd && (
+              {displaySummary && (
                 <button data-tab="readme" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-primary text-primary cursor-pointer">概述</button>
               )}
               {skill.files.length > 0 && (
                 <button data-tab="files" class:list={['tab-btn px-5 py-3 text-sm font-medium border-b-2 cursor-pointer',
-                  skill.skillMd ? 'border-transparent text-gray-500 hover:text-gray-300 transition-colors' : 'border-primary text-primary'
+                  displaySummary ? 'border-transparent text-gray-500 hover:text-gray-300 transition-colors' : 'border-primary text-primary'
                 ]}>文件</button>
               )}
             </div>
           </div>
 
-          <!-- Tab: README -->
-          {skill.skillMd && (
+          <!-- Tab: Summary -->
+          {displaySummary && (
             <div id="tab-readme" class="tab-content">
-              <div id="markdownContent" class="prose prose-invert prose-sm max-w-none
-                prose-headings:text-gray-200 prose-headings:font-semibold
-                prose-p:text-gray-400 prose-p:leading-relaxed
-                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-                prose-code:text-primary prose-code:bg-surface-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-                prose-pre:bg-surface-card prose-pre:border prose-pre:border-border prose-pre:rounded-xl
-                prose-li:text-gray-400
-                prose-strong:text-gray-300
-                prose-hr:border-border
-              ">
-                <p class="text-gray-500">Loading...</p>
+              <div class="prose prose-invert prose-sm max-w-none prose-p:text-gray-400 prose-p:leading-relaxed">
+                <p class="text-gray-300 leading-relaxed whitespace-pre-line">{displaySummary}</p>
               </div>
             </div>
           )}
 
           <!-- Tab: Files -->
           {skill.files.length > 0 && (
-            <div id="tab-files" class:list={['tab-content', skill.skillMd ? 'hidden' : '']}>
+            <div id="tab-files" class:list={['tab-content', displaySummary ? 'hidden' : '']}>
               <div class="bg-surface-card border border-border rounded-xl overflow-hidden">
                 {skill.files.map((file, idx) => (
                   <div class:list={['border-border', idx > 0 ? 'border-t' : '']}>
@@ -226,7 +217,7 @@ const displaySummary = skill.summary || skill.description;
                       <span class="text-xs text-gray-600">{file.size} B</span>
                     </button>
                     <div data-file-content={idx} class="hidden">
-                      <pre class="px-5 py-4 text-sm font-mono text-gray-400 bg-surface overflow-x-auto border-t border-border leading-relaxed"><code>{file.path === 'SKILL.md' ? skill.skillMd : file.content}</code></pre>
+                      <pre class="px-5 py-4 text-sm font-mono text-gray-400 bg-surface overflow-x-auto border-t border-border leading-relaxed"><code>{file.content}</code></pre>
                     </div>
                   </div>
                 ))}
@@ -258,7 +249,7 @@ const displaySummary = skill.summary || skill.description;
     </div>
   </section>
 
-  <script is:inline define:vars={{ skillMd: skill.skillMd }}>
+  <script is:inline>
     // Tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -288,41 +279,6 @@ const displaySummary = skill.summary || skill.description;
       copyBtn.addEventListener('click', function() {
         navigator.clipboard.writeText(this.dataset.command);
       });
-    }
-
-    // Render Markdown
-    if (skillMd) {
-      const container = document.getElementById('markdownContent');
-      let content = skillMd;
-
-      if (content.startsWith('---')) {
-        const endIdx = content.indexOf('---', 3);
-        if (endIdx !== -1) {
-          content = content.substring(endIdx + 3).trim();
-        }
-      }
-
-      let html = content
-        .replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) =>
-          `<pre><code class="language-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
-        .replace(/^- (.+)$/gm, '<li>$1</li>')
-        .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/^---$/gm, '<hr />');
-
-      html = '<p>' + html + '</p>';
-      html = html.replace(/<p>\s*<(h[1-3]|pre|ul|ol|hr)/g, '<$1');
-      html = html.replace(/<\/(h[1-3]|pre|ul|ol)>\s*<\/p>/g, '</$1>');
-      html = html.replace(/<p>\s*<\/p>/g, '');
-
-      container.innerHTML = html;
     }
   </script>
 </Base>

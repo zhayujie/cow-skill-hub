@@ -17,7 +17,6 @@ export interface SkillData {
   sourceProvider: 'cowagent' | 'github' | 'openclaw' | 'clawhub' | 'linkai' | 'community';
   sourceUrl?: string;
   sourcePath?: string;
-  skillMd: string;
   files: SkillFile[];
 }
 
@@ -74,44 +73,8 @@ export const skills: SkillData[] = [
     homepage: 'https://github.com/zhayujie/chatgpt-on-wechat',
     sourceType: 'zip',
     sourceProvider: 'cowagent',
-    skillMd: `---
-name: web-search
-description: Search the web using Google/Bing API and summarize results.
-metadata:
-  requires:
-    env: [GOOGLE_API_KEY]
----
-
-# Web Search
-
-Search the internet for real-time information using Google or Bing search APIs.
-
-## Usage
-
-When the user asks about current events, recent information, or anything that requires up-to-date data, use this skill to search the web.
-
-### Supported Search Engines
-
-- **Google Custom Search** - Requires \`GOOGLE_API_KEY\` and \`GOOGLE_CX_ID\`
-- **Bing Search** - Requires \`BING_API_KEY\`
-
-## Setup
-
-1. Get your API key from [Google Cloud Console](https://console.cloud.google.com/)
-2. Set the environment variable:
-
-\`\`\`bash
-export GOOGLE_API_KEY=your_api_key_here
-\`\`\`
-
-## Examples
-
-- "Search for the latest news about AI agents"
-- "What happened in tech this week?"
-- "Find the current weather in Beijing"
-`,
     files: [
-      { path: 'SKILL.md', content: '(see skillMd)', size: 812 },
+      { path: 'SKILL.md', content: '(SKILL.md content)', size: 812 },
       {
         path: 'scripts/search.py',
         content: `#!/usr/bin/env python3
@@ -178,48 +141,8 @@ if __name__ == '__main__':
     homepage: 'https://cli.github.com/',
     sourceType: 'zip',
     sourceProvider: 'cowagent',
-    skillMd: `---
-name: github-tool
-description: "GitHub operations via gh CLI: issues, PRs, releases, code browsing."
-metadata:
-  requires:
-    bins: [gh]
-  install:
-    - kind: brew
-      formula: gh
-      bins: [gh]
-      label: "Install GitHub CLI (brew)"
----
-
-# GitHub
-
-Interact with GitHub repositories using the \`gh\` CLI tool.
-
-## Capabilities
-
-- Create and manage Issues
-- View and review Pull Requests
-- Create Releases
-- Browse repository code
-- Manage GitHub Actions workflows
-
-## Prerequisites
-
-Install the GitHub CLI:
-
-\`\`\`bash
-brew install gh
-gh auth login
-\`\`\`
-
-## Examples
-
-- "Create an issue titled 'Bug: login fails on mobile'"
-- "Show me the open PRs for this repo"
-- "Create a release v1.0.0 with the latest changes"
-`,
     files: [
-      { path: 'SKILL.md', content: '(see skillMd)', size: 620 },
+      { path: 'SKILL.md', content: '(SKILL.md content)', size: 620 },
     ],
   },
   {
@@ -238,37 +161,8 @@ gh auth login
     platforms: ['darwin', 'linux', 'windows'],
     sourceType: 'zip',
     sourceProvider: 'cowagent',
-    skillMd: `---
-name: code-runner
-description: Execute code snippets in a sandboxed environment.
-metadata:
-  requires:
-    anyBins: [python3, node]
----
-
-# Code Runner
-
-Safely execute code snippets in a sandboxed environment with output capture.
-
-## Supported Languages
-
-- Python 3
-- JavaScript (Node.js)
-- Shell (Bash)
-
-## Features
-
-- Automatic timeout (30s default)
-- Output and error capture
-- Temporary file cleanup
-- Resource limits
-
-## Usage
-
-When the user provides code to execute or asks to run a script, use the bash tool to execute it with appropriate sandboxing.
-`,
     files: [
-      { path: 'SKILL.md', content: '(see skillMd)', size: 450 },
+      { path: 'SKILL.md', content: '(SKILL.md content)', size: 450 },
       {
         path: 'scripts/sandbox.py',
         content: `#!/usr/bin/env python3
@@ -320,33 +214,8 @@ if __name__ == '__main__':
     homepage: 'https://developers.notion.com/',
     sourceType: 'zip',
     sourceProvider: 'community',
-    skillMd: `---
-name: notion-sync
-description: Integrate with Notion workspace for page and database management.
-metadata:
-  requires:
-    env: [NOTION_API_KEY]
----
-
-# Notion Sync
-
-Read and manage your Notion workspace content.
-
-## Setup
-
-1. Create a Notion integration at [notion.so/my-integrations](https://www.notion.so/my-integrations)
-2. Set the API key: \`export NOTION_API_KEY=secret_xxx\`
-3. Share target pages/databases with your integration
-
-## Capabilities
-
-- Search across workspace
-- Read page content
-- Create new pages
-- Update database entries
-`,
     files: [
-      { path: 'SKILL.md', content: '(see skillMd)', size: 520 },
+      { path: 'SKILL.md', content: '(SKILL.md content)', size: 520 },
     ],
   },
   {
@@ -365,38 +234,8 @@ Read and manage your Notion workspace content.
     platforms: ['darwin', 'linux', 'windows'],
     sourceType: 'zip',
     sourceProvider: 'cowagent',
-    skillMd: `---
-name: data-analysis
-description: Analyze data from CSV/Excel files with statistical analysis and visualization.
-metadata:
-  requires:
-    bins: [python3]
-  install:
-    - kind: pip
-      package: pandas matplotlib openpyxl
-      label: "Install data analysis dependencies"
----
-
-# Data Analysis
-
-Powerful data analysis with CSV/Excel parsing, statistics, and chart generation.
-
-## Features
-
-- CSV and Excel file parsing
-- Descriptive statistics
-- Data visualization (bar, line, scatter, pie charts)
-- Correlation analysis
-- Professional report generation
-
-## Prerequisites
-
-\`\`\`bash
-pip install pandas matplotlib openpyxl
-\`\`\`
-`,
     files: [
-      { path: 'SKILL.md', content: '(see skillMd)', size: 580 },
+      { path: 'SKILL.md', content: '(SKILL.md content)', size: 580 },
       { path: 'scripts/analyze.py', content: '# Data analysis script\nimport pandas as pd\nimport matplotlib\n...', size: 2400 },
       { path: 'templates/report.md', content: '# Analysis Report\n\n## Summary\n...', size: 320 },
     ],
@@ -417,25 +256,8 @@ pip install pandas matplotlib openpyxl
     platforms: ['darwin', 'linux', 'windows'],
     sourceType: 'zip',
     sourceProvider: 'community',
-    skillMd: `---
-name: wechat-bot-helper
-description: Enhanced WeChat bot features including group management and scheduled messages.
----
-
-# WeChat Bot Helper
-
-Advanced features for WeChat bot management.
-
-## Features
-
-- Group management commands
-- Scheduled message sending
-- Auto-reply templates
-- Message forwarding rules
-- Keyword monitoring
-`,
     files: [
-      { path: 'SKILL.md', content: '(see skillMd)', size: 380 },
+      { path: 'SKILL.md', content: '(SKILL.md content)', size: 380 },
     ],
   },
   {
@@ -456,7 +278,6 @@ Advanced features for WeChat bot management.
     sourceType: 'registry',
     sourceProvider: 'clawhub',
     sourceUrl: 'peekaboo',
-    skillMd: '',
     files: [],
   },
   {
@@ -477,7 +298,6 @@ Advanced features for WeChat bot management.
     sourceType: 'github',
     sourceProvider: 'github',
     sourceUrl: 'someone/auto-coder',
-    skillMd: '',
     files: [],
   },
   {
@@ -498,7 +318,6 @@ Advanced features for WeChat bot management.
     sourceType: 'registry',
     sourceProvider: 'linkai',
     sourceUrl: 'knowledge-base',
-    skillMd: '',
     files: [],
   },
 ];
