@@ -4,9 +4,10 @@ import { formatDownloads } from '@/data/skills';
 
 interface Props {
   skill: SkillData;
+  tagMap?: Record<string, string>;
 }
 
-const { skill } = Astro.props;
+const { skill, tagMap = {} } = Astro.props;
 
 const categoryLabel: Record<string, string> = {
   community: '社区',
@@ -59,7 +60,7 @@ const Tag = hasDetail ? 'a' : 'div';
     <p class="text-sm text-gray-300 leading-relaxed mb-5 line-clamp-2 min-h-[2.8em]">{skill.description}</p>
     <div class="flex items-center gap-2 mb-4 flex-wrap min-h-[1.75rem]">
       {skill.tags.slice(0, 3).map(tag => (
-        <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
+        <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tag}</span>
       ))}
     </div>
     <div class="flex items-center justify-between text-xs text-gray-500 mt-auto">
@@ -99,7 +100,7 @@ const Tag = hasDetail ? 'a' : 'div';
     <p class="text-sm text-gray-300 leading-relaxed mb-5 line-clamp-2 min-h-[2.8em]">{skill.description}</p>
     <div class="flex items-center gap-2 mb-4 flex-wrap min-h-[1.75rem]">
       {skill.tags.slice(0, 3).map(tag => (
-        <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
+        <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tag}</span>
       ))}
     </div>
     <div class="flex items-center justify-between text-xs text-gray-500 mt-auto">

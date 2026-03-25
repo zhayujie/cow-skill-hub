@@ -1,14 +1,18 @@
 ---
 import Base from '@/layouts/Base.astro';
-import { formatDownloads } from '@/data/skills';
+import { formatDownloads, tagOptions } from '@/data/skills';
 import type { SkillData } from '@/data/skills';
-import { getSkillByName } from '@/data/db';
+import { getSkillByName, getTagDefinitions } from '@/data/db';
 
 const { name } = Astro.params;
 const runtime = Astro.locals?.runtime;
 const db = runtime?.env?.DB || null;
 
 const skill = await getSkillByName(db, name!);
+const dbTags = await getTagDefinitions(db);
+const tags = dbTags.length > 0 ? dbTags : tagOptions;
+const tagMap: Record<string, string> = {};
+for (const t of tags) { tagMap[t.id] = t.name; }
 if (!skill) {
   return Astro.redirect('/');
 }
@@ -162,44 +166,49 @@ const displaySummary = skill.summary || skill.description;
 
           <div class="flex flex-wrap gap-1.5 mt-3">
             {skill.tags.map(tag => (
-              <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
+              <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tag}</span>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Only show tabs for skills with content */}
-      {skill.skillMd ? (
+      {(skill.skillMd || skill.files.length > 0) ? (
         <>
           <!-- Tabs -->
           <div class="border-b border-border mb-8">
             <div class="flex gap-0">
-              <button data-tab="readme" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-primary text-primary cursor-pointer">概述</button>
+              {skill.skillMd && (
+                <button data-tab="readme" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-primary text-primary cursor-pointer">概述</button>
+              )}
               {skill.files.length > 0 && (
-                <button data-tab="files" class="tab-btn px-5 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-300 transition-colors cursor-pointer">文件</button>
+                <button data-tab="files" class:list={['tab-btn px-5 py-3 text-sm font-medium border-b-2 cursor-pointer',
+                  skill.skillMd ? 'border-transparent text-gray-500 hover:text-gray-300 transition-colors' : 'border-primary text-primary'
+                ]}>文件</button>
               )}
             </div>
           </div>
 
           <!-- Tab: README -->
-          <div id="tab-readme" class="tab-content">
-            <div id="markdownContent" class="prose prose-invert prose-sm max-w-none
-              prose-headings:text-gray-200 prose-headings:font-semibold
-              prose-p:text-gray-400 prose-p:leading-relaxed
-              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-              prose-code:text-primary prose-code:bg-surface-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-              prose-pre:bg-surface-card prose-pre:border prose-pre:border-border prose-pre:rounded-xl
-              prose-li:text-gray-400
-              prose-strong:text-gray-300
-              prose-hr:border-border
-            ">
-              <p class="text-gray-500">Loading...</p>
+          {skill.skillMd && (
+            <div id="tab-readme" class="tab-content">
+              <div id="markdownContent" class="prose prose-invert prose-sm max-w-none
+                prose-headings:text-gray-200 prose-headings:font-semibold
+                prose-p:text-gray-400 prose-p:leading-relaxed
+                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                prose-code:text-primary prose-code:bg-surface-card prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+                prose-pre:bg-surface-card prose-pre:border prose-pre:border-border prose-pre:rounded-xl
+                prose-li:text-gray-400
+                prose-strong:text-gray-300
+                prose-hr:border-border
+              ">
+                <p class="text-gray-500">Loading...</p>
+              </div>
             </div>
-          </div>
+          )}
 
           <!-- Tab: Files -->
           {skill.files.length > 0 && (
-            <div id="tab-files" class="tab-content hidden">
+            <div id="tab-files" class:list={['tab-content', skill.skillMd ? 'hidden' : '']}>
               <div class="bg-surface-card border border-border rounded-xl overflow-hidden">
                 {skill.files.map((file, idx) => (
                   <div class:list={['border-border', idx > 0 ? 'border-t' : '']}>
