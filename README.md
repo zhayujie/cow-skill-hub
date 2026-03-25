@@ -21,11 +21,11 @@ CowAgent Skill Hub is the official skill marketplace for [CowAgent](https://gith
 
 ## Features
 
-- Browse official, community, and third-party skills
+- Browse recommended, community, and third-party skills
 - Search by name, description, or tags
-- View skill documentation, files, and install requirements
+- Filter by category and tags
+- View skill documentation and file previews
 - One-command install: `cow skill install <name>`
-- Community contribution via GitHub Pull Requests
 
 ## Architecture
 
@@ -37,32 +37,14 @@ CowAgent Skill Hub is the official skill marketplace for [CowAgent](https://gith
 | Storage | Cloudflare R2 (skill zip packages) |
 | Hosting | Cloudflare Pages |
 
-## Contributing Skills
+## Skill Types
 
-1. Fork this repository
-2. Create a new directory under `skills/` with your skill name
-3. Add a `SKILL.md` file with YAML frontmatter
-4. Submit a Pull Request
-
-### SKILL.md Format
-
-```yaml
----
-name: my-skill
-description: What this skill does
-version: 1.0.0
-author: your-name
-tags: [tag1, tag2]
-metadata:
-  requires:
-    env: [API_KEY_NAME]
-    bins: [required-binary]
----
-
-# My Skill
-
-Description and usage instructions...
-```
+| Type | Storage | Install |
+|------|---------|---------|
+| Community | Files stored in R2 | `cow skill install web-search` |
+| External (GitHub) | Link only | `cow skill install github:owner/repo` |
+| External (ClawHub) | Link only | `cow skill install clawhub:skill-name` |
+| External (LinkAI) | Link only | `cow skill install linkai:skill-name` |
 
 ## Local Development
 

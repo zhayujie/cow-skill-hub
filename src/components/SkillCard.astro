@@ -1,6 +1,6 @@
 ---
 import type { SkillData } from '@/data/skills';
-import { formatDownloads, providers } from '@/data/skills';
+import { formatDownloads } from '@/data/skills';
 
 interface Props {
   skill: SkillData;
@@ -9,18 +9,15 @@ interface Props {
 const { skill } = Astro.props;
 
 const categoryLabel: Record<string, string> = {
-  official: '官方',
   community: '社区',
   external: '第三方',
 };
 
 const categoryColor: Record<string, string> = {
-  official: 'bg-primary/10 text-primary border-primary/20',
   community: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   external: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
 };
 
-const provider = providers[skill.sourceProvider];
 const isGithub = skill.sourceType === 'github';
 const isRegistry = skill.sourceType === 'registry';
 const isExternal = isGithub || isRegistry;
@@ -45,40 +42,40 @@ const Tag = hasDetail ? 'a' : 'div';
     href={`/skills/${skill.name}`}
     class="skill-card group block bg-surface-card border border-border rounded-2xl p-7 transition-all duration-200 hover:bg-surface-card-hover hover:border-border-light hover:-translate-y-0.5 cursor-pointer"
   >
-    <div class="flex items-start justify-between mb-1">
-      <h3 class="text-base font-semibold text-gray-200 group-hover:text-primary transition-colors">
-        {skill.displayName}
-      </h3>
-      <div class="flex items-center gap-1.5 shrink-0">
-        {provider && skill.sourceProvider !== 'cowagent' && (
-          <span class={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${provider.color}`}>
-            {provider.label}
+    <Fragment>
+      <div class="flex items-start justify-between mb-1">
+        <h3 class="text-base font-semibold text-white group-hover:text-primary transition-colors">
+          {skill.displayName}
+        </h3>
+        <div class="flex items-center gap-1.5 shrink-0">
+          {skill.featured && (
+            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">推荐</span>
+          )}
+          <span class={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
+            {categoryLabel[skill.category]}
           </span>
-        )}
-        <span class={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
-          {categoryLabel[skill.category]}
-        </span>
+        </div>
       </div>
-    </div>
-    <p class="text-xs text-gray-600 font-mono mb-4">{skill.name}</p>
-    <p class="text-sm text-gray-400 leading-relaxed mb-5 line-clamp-2">{skill.description}</p>
-    <div class="flex items-center gap-2 mb-4 flex-wrap">
-      {skill.tags.slice(0, 3).map(tag => (
-        <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
-      ))}
-    </div>
-    <div class="flex items-center justify-between text-xs text-gray-500">
-      <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          {formatDownloads(skill.downloads)}
-        </span>
-        <span>v{skill.version}</span>
+      <p class="text-xs text-gray-500 font-mono mb-4">{skill.name}</p>
+      <p class="text-sm text-gray-300 leading-relaxed mb-5 line-clamp-2">{skill.description}</p>
+      <div class="flex items-center gap-2 mb-4 flex-wrap">
+        {skill.tags.slice(0, 3).map(tag => (
+          <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
+        ))}
       </div>
-      <span>{skill.author}</span>
-    </div>
+      <div class="flex items-center justify-between text-xs text-gray-500">
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            {formatDownloads(skill.downloads)}
+          </span>
+          <span>v{skill.version}</span>
+        </div>
+        <span>{skill.author}</span>
+      </div>
+    </Fragment>
   </a>
 ) : (
   <div
@@ -87,39 +84,39 @@ const Tag = hasDetail ? 'a' : 'div';
     data-skill-display={skill.displayName}
     data-homepage={skill.homepage || ''}
   >
-    <div class="flex items-start justify-between mb-1">
-      <h3 class="text-base font-semibold text-gray-200 group-hover:text-primary transition-colors">
-        {skill.displayName}
-      </h3>
-      <div class="flex items-center gap-1.5 shrink-0">
-        {provider && skill.sourceProvider !== 'cowagent' && (
-          <span class={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${provider.color}`}>
-            {provider.label}
+    <Fragment>
+      <div class="flex items-start justify-between mb-1">
+        <h3 class="text-base font-semibold text-white group-hover:text-primary transition-colors">
+          {skill.displayName}
+        </h3>
+        <div class="flex items-center gap-1.5 shrink-0">
+          {skill.featured && (
+            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">推荐</span>
+          )}
+          <span class={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
+            {categoryLabel[skill.category]}
           </span>
-        )}
-        <span class={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
-          {categoryLabel[skill.category]}
-        </span>
+        </div>
       </div>
-    </div>
-    <p class="text-xs text-gray-600 font-mono mb-4">{skill.name}</p>
-    <p class="text-sm text-gray-400 leading-relaxed mb-5 line-clamp-2">{skill.description}</p>
-    <div class="flex items-center gap-2 mb-4 flex-wrap">
-      {skill.tags.slice(0, 3).map(tag => (
-        <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
-      ))}
-    </div>
-    <div class="flex items-center justify-between text-xs text-gray-500">
-      <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          {formatDownloads(skill.downloads)}
-        </span>
-        <span>v{skill.version}</span>
+      <p class="text-xs text-gray-500 font-mono mb-4">{skill.name}</p>
+      <p class="text-sm text-gray-300 leading-relaxed mb-5 line-clamp-2">{skill.description}</p>
+      <div class="flex items-center gap-2 mb-4 flex-wrap">
+        {skill.tags.slice(0, 3).map(tag => (
+          <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tag}</span>
+        ))}
       </div>
-      <span>{skill.author}</span>
-    </div>
+      <div class="flex items-center justify-between text-xs text-gray-500">
+        <div class="flex items-center gap-4">
+          <span class="flex items-center gap-1">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            {formatDownloads(skill.downloads)}
+          </span>
+          <span>v{skill.version}</span>
+        </div>
+        <span>{skill.author}</span>
+      </div>
+    </Fragment>
   </div>
 )}

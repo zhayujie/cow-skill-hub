@@ -5,7 +5,7 @@ export interface SkillData {
   summary: string;
   version: string;
   author: string;
-  category: 'official' | 'community' | 'external';
+  category: 'community' | 'external';
   tags: string[];
   featured: boolean;
   downloads: number;
@@ -29,7 +29,7 @@ export interface SkillFile {
 
 export const categories = [
   { id: 'all', name: '全部', nameEn: 'All' },
-  { id: 'official', name: '官方推荐', nameEn: 'Official' },
+  { id: 'featured', name: '推荐', nameEn: 'Featured' },
   { id: 'community', name: '社区', nameEn: 'Community' },
   { id: 'external', name: '第三方', nameEn: 'External' },
 ] as const;
@@ -64,7 +64,7 @@ export const skills: SkillData[] = [
     summary: '通过搜索引擎获取互联网实时信息，支持 Google、Bing 等多个搜索引擎，自动提取和总结搜索结果。可配置搜索引擎偏好和结果数量，适用于需要实时数据的对话场景。',
     version: '1.0.0',
     author: 'CowAgent',
-    category: 'official',
+    category: 'community',
     tags: ['search', 'web'],
     featured: true,
     downloads: 3280,
@@ -168,7 +168,7 @@ if __name__ == '__main__':
     summary: '通过 gh CLI 操作 GitHub 仓库，支持创建 Issue、查看 PR、管理 Release、浏览代码等常用操作。让 Agent 成为你的 GitHub 助手。',
     version: '1.2.0',
     author: 'CowAgent',
-    category: 'official',
+    category: 'community',
     tags: ['coding', 'devops', 'api'],
     featured: true,
     downloads: 2150,
@@ -229,7 +229,7 @@ gh auth login
     summary: '在沙箱环境中安全执行代码片段，支持 Python、JavaScript、Shell 等多种语言，自动捕获输出和错误。内置超时和资源限制保护。',
     version: '1.0.0',
     author: 'CowAgent',
-    category: 'official',
+    category: 'community',
     tags: ['coding', 'productivity'],
     featured: true,
     downloads: 4520,
@@ -356,7 +356,7 @@ Read and manage your Notion workspace content.
     summary: '数据分析助手，支持 CSV/Excel 文件解析、统计分析、数据可视化图表生成，输出专业的分析报告。适用于数据探索、趋势分析和报表生成场景。',
     version: '1.1.0',
     author: 'CowAgent',
-    category: 'official',
+    category: 'community',
     tags: ['data', 'ai', 'productivity'],
     featured: true,
     downloads: 1670,

@@ -1,23 +1,35 @@
 -- CowAgent Skill Hub - D1 Database Schema
 
+-- Users (for future GitHub OAuth login and skill ownership)
+CREATE TABLE IF NOT EXISTS users (
+  id            TEXT PRIMARY KEY,                     -- GitHub user ID or internal ID
+  username      TEXT NOT NULL UNIQUE,                 -- GitHub username or display slug
+  display_name  TEXT NOT NULL DEFAULT '',
+  avatar_url    TEXT,
+  github_url    TEXT,
+  role          TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS skills (
   name             TEXT PRIMARY KEY,                -- unique slug, e.g. "web-search"
   display_name     TEXT NOT NULL,                   -- display name, e.g. "Web Search"
   description      TEXT NOT NULL DEFAULT '',        -- short one-liner for cards
-  summary          TEXT NOT NULL DEFAULT '',        -- longer 2-3 sentence overview for detail page (fallback to description)
+  summary          TEXT NOT NULL DEFAULT '',        -- longer overview for detail page
   version          TEXT NOT NULL DEFAULT '1.0.0',
   author           TEXT NOT NULL DEFAULT 'CowAgent',
-  category         TEXT NOT NULL DEFAULT 'official' CHECK (category IN ('official', 'community', 'external')),
+  author_id        TEXT REFERENCES users(id),       -- optional link to users table
+  category         TEXT NOT NULL DEFAULT 'community' CHECK (category IN ('community', 'external')),
   tags             TEXT NOT NULL DEFAULT '[]',      -- JSON array, e.g. '["search","web"]'
-  featured         INTEGER NOT NULL DEFAULT 0,      -- 1 = show on homepage featured section
+  featured         INTEGER NOT NULL DEFAULT 0,      -- 1 = recommended/featured skill
   sort_order       INTEGER NOT NULL DEFAULT 100,    -- lower = higher priority
   downloads        INTEGER NOT NULL DEFAULT 0,
   views            INTEGER NOT NULL DEFAULT 0,
   status           TEXT NOT NULL DEFAULT 'published' CHECK (status IN ('draft', 'pending', 'published', 'hidden')),
-  skill_md         TEXT NOT NULL DEFAULT '',        -- full SKILL.md content for detail page rendering
+  skill_md         TEXT NOT NULL DEFAULT '',        -- full SKILL.md content for detail page
   requires_env     TEXT NOT NULL DEFAULT '[]',      -- JSON array, e.g. '["GOOGLE_API_KEY"]'
   requires_bins    TEXT NOT NULL DEFAULT '[]',      -- JSON array, e.g. '["gh","curl"]'
-  platforms        TEXT NOT NULL DEFAULT '["darwin","linux","windows"]', -- JSON array of supported OS
+  platforms        TEXT NOT NULL DEFAULT '["darwin","linux","windows"]',
   homepage         TEXT,                            -- external homepage URL
   source_type      TEXT NOT NULL DEFAULT 'zip' CHECK (source_type IN ('zip', 'github', 'registry')),
   source_provider  TEXT NOT NULL DEFAULT 'cowagent' CHECK (source_provider IN ('cowagent', 'github', 'openclaw', 'clawhub', 'linkai', 'community')),
@@ -33,7 +45,7 @@ CREATE TABLE IF NOT EXISTS skill_files (
   skill_name  TEXT NOT NULL REFERENCES skills(name) ON DELETE CASCADE,
   path        TEXT NOT NULL,                       -- relative path, e.g. "scripts/search.py"
   content     TEXT NOT NULL DEFAULT '',            -- file text content (for preview)
-  size        INTEGER NOT NULL DEFAULT 0,          -- file size in bytes
+  size        INTEGER NOT NULL DEFAULT 0,
   UNIQUE(skill_name, path)
 );
 
@@ -42,15 +54,14 @@ CREATE TABLE IF NOT EXISTS install_logs (
   skill_name  TEXT NOT NULL REFERENCES skills(name) ON DELETE CASCADE,
   client_ip   TEXT,
   user_agent  TEXT,
-  cow_version TEXT,                                -- CowAgent version
+  cow_version TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- Tag definitions for frontend display and filtering
 CREATE TABLE IF NOT EXISTS tag_definitions (
   id         TEXT PRIMARY KEY,                     -- tag slug, e.g. "coding"
   name       TEXT NOT NULL,                        -- display name, e.g. "编程"
-  sort_order INTEGER NOT NULL DEFAULT 100          -- lower = show first
+  sort_order INTEGER NOT NULL DEFAULT 100
 );
 
 INSERT OR IGNORE INTO tag_definitions (id, name, sort_order) VALUES
@@ -71,6 +82,7 @@ CREATE INDEX IF NOT EXISTS idx_skills_status ON skills(status);
 CREATE INDEX IF NOT EXISTS idx_skills_featured ON skills(featured);
 CREATE INDEX IF NOT EXISTS idx_skills_downloads ON skills(downloads DESC);
 CREATE INDEX IF NOT EXISTS idx_skills_provider ON skills(source_provider);
+CREATE INDEX IF NOT EXISTS idx_skills_author ON skills(author_id);
 CREATE INDEX IF NOT EXISTS idx_skill_files_name ON skill_files(skill_name);
 CREATE INDEX IF NOT EXISTS idx_install_logs_name ON install_logs(skill_name);
 CREATE INDEX IF NOT EXISTS idx_install_logs_date ON install_logs(created_at);
