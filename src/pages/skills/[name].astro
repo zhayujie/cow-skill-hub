@@ -42,7 +42,7 @@ function getInstallCommand(skill: SkillData): string {
 }
 
 const installCmd = getInstallCommand(skill);
-const displaySummary = skill.summary || skill.description;
+const displaySummary = skill.summary;
 ---
 
 <Base title={skill.displayName} description={skill.description}>
