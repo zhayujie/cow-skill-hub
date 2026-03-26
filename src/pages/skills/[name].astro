@@ -44,6 +44,12 @@ function getInstallCommand(skill: SkillData): string {
 const installCmd = getInstallCommand(skill);
 const displaySummary = skill.summary;
 const singleSkillMd = skill.files.length === 1 && skill.files[0].path.toLowerCase() === 'skill.md';
+
+function formatFileSize(bytes: number): string {
+  if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+  if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return bytes + ' B';
+}
 ---
 
 <Base title={skill.displayName} description={skill.description}>
@@ -219,7 +225,7 @@ const singleSkillMd = skill.files.length === 1 && skill.files[0].path.toLowerCas
                           </svg>
                           <span class="text-sm text-gray-300 font-mono truncate">{file.path}</span>
                         </div>
-                        <span class="text-xs text-gray-600 shrink-0 ml-2">{file.size} B</span>
+                        <span class="text-xs text-gray-600 shrink-0 ml-2">{formatFileSize(file.size)}</span>
                       </button>
                       <div data-file-content={idx} class:list={[defaultOpen ? '' : 'hidden']}>
                         <pre class="px-5 py-4 text-sm font-mono text-gray-400 bg-surface border-t border-border leading-relaxed overflow-x-auto max-w-full"><code class="whitespace-pre-wrap break-words">{file.content}</code></pre>
