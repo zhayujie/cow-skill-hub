@@ -43,6 +43,7 @@ function getInstallCommand(skill: SkillData): string {
 
 const installCmd = getInstallCommand(skill);
 const displaySummary = skill.summary;
+const singleSkillMd = skill.files.length === 1 && skill.files[0].path.toLowerCase() === 'skill.md';
 ---
 
 <Base title={skill.displayName} description={skill.description}>
@@ -67,7 +68,7 @@ const displaySummary = skill.summary;
               {categoryLabel[skill.category]}
             </span>
           </div>
-          <p class="text-gray-300 text-base leading-relaxed max-w-2xl mb-4">{displaySummary}</p>
+          <p class="text-gray-300 text-base leading-relaxed max-w-2xl mb-4">{skill.description}</p>
           <div class="flex items-center gap-5 text-sm text-gray-500">
             <span class="flex items-center gap-1.5">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -96,14 +97,16 @@ const displaySummary = skill.summary;
         <!-- Install card -->
         <div class="shrink-0 bg-surface-card border border-border rounded-xl p-5 w-full sm:w-80">
           <p class="text-xs text-gray-500 mb-2">安装命令</p>
-          <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-2.5 mb-4">
-            <code class="text-sm font-mono text-gray-300 truncate">
-              <span class="text-primary">$</span> {installCmd}
-            </code>
+          <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-2.5 mb-4 min-w-0">
+            <div class="overflow-x-auto min-w-0 flex-1 scrollbar-thin">
+              <code class="text-sm font-mono text-gray-300 whitespace-nowrap">
+                <span class="text-primary">$</span> {installCmd}
+              </code>
+            </div>
             <button
               id="copyBtn"
               data-command={installCmd}
-              class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0 ml-2"
+              class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0 ml-3"
               aria-label="Copy"
             >
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -164,7 +167,7 @@ const displaySummary = skill.summary;
             </div>
           )}
 
-          <div class="flex flex-wrap gap-1.5 mt-3">
+          <div class="flex flex-wrap gap-1.5 mt-3 -ml-1.5">
             {skill.tags.map(tag => (
               <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tag}</span>
             ))}
@@ -201,26 +204,29 @@ const displaySummary = skill.summary;
           {skill.files.length > 0 && (
             <div id="tab-files" class:list={['tab-content', displaySummary ? 'hidden' : '']}>
               <div class="bg-surface-card border border-border rounded-xl overflow-hidden">
-                {skill.files.map((file, idx) => (
-                  <div class:list={['border-border', idx > 0 ? 'border-t' : '']}>
-                    <button
-                      data-file-idx={idx}
-                      class="file-toggle w-full flex items-center justify-between px-5 py-3 hover:bg-surface-card-hover transition-colors cursor-pointer text-left"
-                    >
-                      <div class="flex items-center gap-2">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
-                          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                          <polyline points="14 2 14 8 20 8" />
-                        </svg>
-                        <span class="text-sm text-gray-300 font-mono">{file.path}</span>
+                {skill.files.map((file, idx) => {
+                  const defaultOpen = singleSkillMd;
+                  return (
+                    <div class:list={['border-border', idx > 0 ? 'border-t' : '']}>
+                      <button
+                        data-file-idx={idx}
+                        class="file-toggle w-full flex items-center justify-between px-5 py-3 hover:bg-surface-card-hover transition-colors cursor-pointer text-left"
+                      >
+                        <div class="flex items-center gap-2 min-w-0">
+                          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 shrink-0">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                          <span class="text-sm text-gray-300 font-mono truncate">{file.path}</span>
+                        </div>
+                        <span class="text-xs text-gray-600 shrink-0 ml-2">{file.size} B</span>
+                      </button>
+                      <div data-file-content={idx} class:list={[defaultOpen ? '' : 'hidden']}>
+                        <pre class="px-5 py-4 text-sm font-mono text-gray-400 bg-surface border-t border-border leading-relaxed overflow-x-auto max-w-full"><code class="whitespace-pre-wrap break-words">{file.content}</code></pre>
                       </div>
-                      <span class="text-xs text-gray-600">{file.size} B</span>
-                    </button>
-                    <div data-file-content={idx} class="hidden">
-                      <pre class="px-5 py-4 text-sm font-mono text-gray-400 bg-surface overflow-x-auto border-t border-border leading-relaxed"><code>{file.content}</code></pre>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

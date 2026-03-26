@@ -130,9 +130,11 @@ for (const t of tags) { tagMap[t.id] = t.name; }
 
         <!-- Install command -->
         <p class="text-xs text-gray-500 mb-2">安装命令</p>
-        <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-3 mb-6">
-          <code id="modalCmd" class="text-sm font-mono text-gray-300 truncate mr-3"></code>
-          <button id="modalCopyBtn" class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0" aria-label="Copy">
+        <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-3 mb-6 min-w-0">
+          <div class="overflow-x-auto min-w-0 flex-1 scrollbar-thin">
+            <code id="modalCmd" class="text-sm font-mono text-gray-300 whitespace-nowrap"></code>
+          </div>
+          <button id="modalCopyBtn" class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0 ml-3" aria-label="Copy">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
