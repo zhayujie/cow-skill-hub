@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS skills (
   source_url       TEXT,                           -- github: "owner/repo", clawhub: slug, etc.
   source_path      TEXT,                           -- subdirectory within source (for multi-skill repos)
   r2_key           TEXT,                           -- R2 object key, e.g. "skills/web-search/1.0.0.zip"
+  sha256           TEXT,                           -- SHA-256 checksum of the zip package
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -52,7 +53,6 @@ CREATE TABLE IF NOT EXISTS skill_files (
 CREATE TABLE IF NOT EXISTS install_logs (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   skill_name  TEXT NOT NULL REFERENCES skills(name) ON DELETE CASCADE,
-  client_ip   TEXT,
   user_agent  TEXT,
   cow_version TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))

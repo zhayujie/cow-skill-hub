@@ -1,32 +1,28 @@
 import type { APIRoute } from 'astro';
-import { json, getDB } from '../../_utils';
+import { json, getDB, isValidSkillName, errorResponse } from '../../_utils';
 
 export const POST: APIRoute = async ({ params, request, locals }) => {
   const db = getDB(locals);
   if (!db) return json({ error: 'DB not available' }, 500);
 
   const { name } = params;
-  let cowVersion = null;
+  if (!isValidSkillName(name)) return json({ error: 'Invalid skill name' }, 400);
+
+  let cowVersion: string | null = null;
   try {
     const body = await request.json();
-    cowVersion = body.cow_version || null;
+    cowVersion = typeof body.cow_version === 'string' ? body.cow_version.slice(0, 64) : null;
   } catch {}
 
-  try {
-    await db.prepare('UPDATE skills SET downloads = downloads + 1 WHERE name = ?').bind(name).run();
+  const userAgent = (request.headers.get('User-Agent') || '').slice(0, 256) || null;
 
+  try {
     await db.prepare(
-      'INSERT INTO install_logs (skill_name, client_ip, user_agent, cow_version) VALUES (?, ?, ?, ?)'
-    ).bind(
-      name,
-      request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For'),
-      request.headers.get('User-Agent'),
-      cowVersion
-    ).run();
+      'INSERT INTO install_logs (skill_name, user_agent, cow_version) VALUES (?, ?, ?)'
+    ).bind(name, userAgent, cowVersion).run();
 
     return json({ ok: true });
-  } catch (err: any) {
-    console.error('install error:', err);
-    return json({ error: err.message || 'Internal Server Error' }, 500);
+  } catch (err: unknown) {
+    return errorResponse('install error:', err);
   }
 };

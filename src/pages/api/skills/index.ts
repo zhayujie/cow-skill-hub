@@ -1,5 +1,9 @@
 import type { APIRoute } from 'astro';
-import { json, getDB, parseSkillRow } from '../_utils';
+import { json, getDB, parseSkillRow, errorResponse } from '../_utils';
+
+function escapeLike(s: string): string {
+  return s.replace(/[%_\\]/g, ch => `\\${ch}`);
+}
 
 export const GET: APIRoute = async ({ locals, url }) => {
   const db = getDB(locals);
@@ -7,10 +11,10 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
   const category = url.searchParams.get('category') || 'all';
   const provider = url.searchParams.get('provider') || 'all';
-  const tag = url.searchParams.get('tag') || '';
-  const q = url.searchParams.get('q') || '';
-  const page = parseInt(url.searchParams.get('page') || '1', 10);
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100);
+  const tag = (url.searchParams.get('tag') || '').trim().slice(0, 50);
+  const q = (url.searchParams.get('q') || '').trim().slice(0, 100);
+  const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
+  const limit = Math.max(1, Math.min(parseInt(url.searchParams.get('limit') || '10', 10), 50));
   const offset = (page - 1) * limit;
 
   let query = "SELECT * FROM skills WHERE status = 'published'";
@@ -29,13 +33,13 @@ export const GET: APIRoute = async ({ locals, url }) => {
   }
 
   if (tag) {
-    query += ' AND tags LIKE ?';
-    params.push(`%"${tag}"%`);
+    query += " AND tags LIKE ? ESCAPE '\\'";
+    params.push(`%"${escapeLike(tag)}"%`);
   }
 
   if (q) {
-    query += ' AND (name LIKE ? OR display_name LIKE ? OR description LIKE ?)';
-    const p = `%${q}%`;
+    query += " AND (name LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\')";
+    const p = `%${escapeLike(q)}%`;
     params.push(p, p, p);
   }
 
@@ -58,12 +62,12 @@ export const GET: APIRoute = async ({ locals, url }) => {
       countParams.push(provider);
     }
     if (tag) {
-      countQuery += ' AND tags LIKE ?';
-      countParams.push(`%"${tag}"%`);
+      countQuery += " AND tags LIKE ? ESCAPE '\\'";
+      countParams.push(`%"${escapeLike(tag)}"%`);
     }
     if (q) {
-      countQuery += ' AND (name LIKE ? OR display_name LIKE ? OR description LIKE ?)';
-      const p = `%${q}%`;
+      countQuery += " AND (name LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\')";
+      const p = `%${escapeLike(q)}%`;
       countParams.push(p, p, p);
     }
     const { results: countResults } = await db.prepare(countQuery).bind(...countParams).all();
@@ -74,8 +78,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
       page,
       limit,
     });
-  } catch (err: any) {
-    console.error('list skills error:', err);
-    return json({ error: err.message || 'Internal Server Error' }, 500);
+  } catch (err: unknown) {
+    return errorResponse('list skills error:', err);
   }
 };

@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { json, getDB } from './_utils';
+import { json, getDB, errorResponse } from './_utils';
 
 export const GET: APIRoute = async ({ locals }) => {
   const db = getDB(locals);
@@ -10,8 +10,7 @@ export const GET: APIRoute = async ({ locals }) => {
       'SELECT id, name, sort_order FROM tag_definitions ORDER BY sort_order ASC'
     ).all();
     return json({ tags: results });
-  } catch (err: any) {
-    console.error('tags error:', err);
-    return json({ error: err.message || 'Internal Server Error' }, 500);
+  } catch (err: unknown) {
+    return errorResponse('tags error:', err);
   }
 };

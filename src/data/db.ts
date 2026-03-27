@@ -11,6 +11,11 @@ interface D1PreparedStatement {
   first(): Promise<Record<string, unknown> | null>;
 }
 
+function safeParse(s: unknown, fallback: unknown) {
+  if (typeof s !== 'string') return fallback;
+  try { return JSON.parse(s); } catch { return fallback; }
+}
+
 function rowToSkill(row: Record<string, unknown>): SkillData {
   return {
     name: row.name as string,
@@ -20,12 +25,12 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
     version: row.version as string || '1.0.0',
     author: row.author as string || 'CowAgent',
     category: row.category as SkillData['category'],
-    tags: JSON.parse(row.tags as string || '[]'),
+    tags: safeParse(row.tags, []),
     featured: !!(row.featured as number),
     downloads: row.downloads as number || 0,
-    requiresEnv: JSON.parse(row.requires_env as string || '[]'),
-    requiresBins: JSON.parse(row.requires_bins as string || '[]'),
-    platforms: JSON.parse(row.platforms as string || '["darwin","linux","windows"]'),
+    requiresEnv: safeParse(row.requires_env, []),
+    requiresBins: safeParse(row.requires_bins, []),
+    platforms: safeParse(row.platforms, ['darwin', 'linux', 'windows']),
     homepage: row.homepage as string | undefined,
     sourceType: row.source_type as SkillData['sourceType'],
     sourceProvider: row.source_provider as SkillData['sourceProvider'],
