@@ -33,7 +33,7 @@ const isExternal = isGithub || isRegistry;
 
 function getInstallCommand(skill: SkillData): string {
   if (isGithub && skill.sourceUrl) {
-    return `cow skill install github:${skill.sourceUrl}${skill.sourcePath ? '#' + skill.sourcePath : ''}`;
+    return `cow skill install ${skill.sourceUrl}`;
   }
   if (isRegistry && skill.sourceUrl) {
     const slug = skill.sourceUrl.includes('/') ? skill.sourceUrl.split('/').pop()! : skill.sourceUrl;

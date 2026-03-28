@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { json, getDB, getBucket, corsHeaders, isValidGitHubSpec, isValidSkillName, errorResponse } from '../../_utils';
+import { json, getDB, getBucket, corsHeaders, isValidSkillName, errorResponse } from '../../_utils';
 
 const REGISTRY_PROVIDERS: Record<string, (slug: string) => string> = {
   clawhub: (slug) => {
@@ -34,15 +34,9 @@ export const GET: APIRoute = async ({ params, locals }) => {
     await db.prepare('UPDATE skills SET downloads = downloads + 1 WHERE name = ?').bind(name).run();
 
     if (skill.source_type === 'github' && skill.source_url) {
-      if (!isValidGitHubSpec(skill.source_url)) {
-        console.error(`Invalid source_url in DB for skill '${name}': ${skill.source_url}`);
-        return json({ error: 'Invalid source configuration' }, 500);
-      }
       return json({
-        redirect: `https://github.com/${skill.source_url}/archive/refs/heads/main.zip`,
         source_type: 'github',
         source_url: skill.source_url,
-        source_path: skill.source_path || null,
       });
     }
 

@@ -297,7 +297,7 @@ if __name__ == '__main__':
     homepage: 'https://github.com/someone/auto-coder',
     sourceType: 'github',
     sourceProvider: 'github',
-    sourceUrl: 'someone/auto-coder',
+    sourceUrl: 'https://github.com/someone/auto-coder',
     files: [],
   },
   {
