@@ -2,7 +2,11 @@ import type { APIRoute } from 'astro';
 import { json, getDB, getBucket, corsHeaders, isValidGitHubSpec, isValidSkillName, errorResponse } from '../../_utils';
 
 const REGISTRY_PROVIDERS: Record<string, (slug: string) => string> = {
-  clawhub: (slug) => `https://wry-manatee-359.convex.site/api/v1/download?slug=${encodeURIComponent(slug)}`,
+  clawhub: (slug) => {
+    // source_url may be stored as "owner/name"; clawhub API expects only the name part
+    const name = slug.includes('/') ? slug.split('/').pop()! : slug;
+    return `https://wry-manatee-359.convex.site/api/v1/download?slug=${encodeURIComponent(name)}`;
+  },
 };
 
 function resolveRegistryDownloadUrl(provider: string, slug: string | null): string | null {

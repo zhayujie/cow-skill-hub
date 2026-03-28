@@ -1,6 +1,6 @@
 ---
 import Base from '@/layouts/Base.astro';
-import { formatDownloads, tagOptions } from '@/data/skills';
+import { tagOptions } from '@/data/skills';
 import type { SkillData } from '@/data/skills';
 import { getSkillByName, getTagDefinitions } from '@/data/db';
 
@@ -35,8 +35,9 @@ function getInstallCommand(skill: SkillData): string {
   if (isGithub && skill.sourceUrl) {
     return `cow skill install github:${skill.sourceUrl}${skill.sourcePath ? '#' + skill.sourcePath : ''}`;
   }
-  if (isRegistry && skill.sourceProvider === 'clawhub') {
-    return `cow skill install clawhub:${skill.sourceUrl || skill.name}`;
+  if (isRegistry && skill.sourceUrl) {
+    const slug = skill.sourceUrl.includes('/') ? skill.sourceUrl.split('/').pop()! : skill.sourceUrl;
+    return `cow skill install ${skill.sourceProvider}:${slug}`;
   }
   return `cow skill install ${skill.name}`;
 }
@@ -84,14 +85,6 @@ function formatFileSize(bytes: number): string {
               {skill.author}
             </span>
             <span>v{skill.version}</span>
-            <span class="flex items-center gap-1">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              {formatDownloads(skill.downloads)} 次安装
-            </span>
             {skill.platforms.length < 3 && (
               <span title={skill.platforms.join(', ')}>
                 {skill.platforms.map(p => p === 'darwin' ? 'macOS' : p === 'linux' ? 'Linux' : 'Windows').join(' / ')}

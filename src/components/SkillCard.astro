@@ -1,6 +1,5 @@
 ---
 import type { SkillData } from '@/data/skills';
-import { formatDownloads } from '@/data/skills';
 
 interface Props {
   skill: SkillData;
@@ -29,7 +28,8 @@ function getInstallCommand(s: SkillData): string {
     return `cow skill install github:${s.sourceUrl}${s.sourcePath ? '#' + s.sourcePath : ''}`;
   }
   if (isRegistry && s.sourceUrl) {
-    return `cow skill install ${s.sourceProvider}:${s.sourceUrl}`;
+    const slug = s.sourceUrl.includes('/') ? s.sourceUrl.split('/').pop()! : s.sourceUrl;
+    return `cow skill install ${s.sourceProvider}:${slug}`;
   }
   return `cow skill install ${s.name}`;
 }
@@ -65,12 +65,6 @@ const Tag = hasDetail ? 'a' : 'div';
     </div>
     <div class="flex items-center justify-between text-xs text-gray-500 mt-auto">
       <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          {formatDownloads(skill.downloads)}
-        </span>
         <span>v{skill.version}</span>
       </div>
       <span>{skill.author}</span>
@@ -105,12 +99,6 @@ const Tag = hasDetail ? 'a' : 'div';
     </div>
     <div class="flex items-center justify-between text-xs text-gray-500 mt-auto">
       <div class="flex items-center gap-4">
-        <span class="flex items-center gap-1">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          {formatDownloads(skill.downloads)}
-        </span>
         <span>v{skill.version}</span>
       </div>
       <span>{skill.author}</span>
