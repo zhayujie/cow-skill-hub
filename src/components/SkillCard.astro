@@ -24,13 +24,6 @@ const isExternal = isGithub || isRegistry;
 const hasDetail = skill.category === 'community';
 
 function getInstallCommand(s: SkillData): string {
-  if (isGithub && s.sourceUrl) {
-    return `cow skill install github:${s.sourceUrl}${s.sourcePath ? '#' + s.sourcePath : ''}`;
-  }
-  if (isRegistry && s.sourceUrl) {
-    const slug = s.sourceUrl.includes('/') ? s.sourceUrl.split('/').pop()! : s.sourceUrl;
-    return `cow skill install ${s.sourceProvider}:${slug}`;
-  }
   return `cow skill install ${s.name}`;
 }
 
