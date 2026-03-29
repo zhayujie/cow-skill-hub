@@ -32,6 +32,8 @@ const isRegistry = skill.sourceType === 'registry';
 const isExternal = isGithub || isRegistry;
 
 function getInstallCommand(skill: SkillData): string {
+  if (skill.sourceProvider === 'clawhub') return `cow skill install clawhub:${skill.name}`;
+  if (skill.sourceProvider === 'github') return `cow skill install github:${skill.name}`;
   return `cow skill install ${skill.name}`;
 }
 
