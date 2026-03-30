@@ -39,6 +39,8 @@ export function parseSkillRow(row: Record<string, unknown>) {
     homepage: row.homepage,
     source_type: row.source_type,
     source_provider: row.source_provider,
+    source_url: row.source_url,
+    has_mirror: !!(row.r2_key),
     created_at: row.created_at,
     updated_at: row.updated_at,
   };

@@ -23,9 +23,11 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
   if (!isValidSkillName(name)) return json({ error: 'Invalid skill name' }, 400);
 
   let provider: string | null = null;
+  let useMirror = false;
   try {
     const body = await request.json();
     provider = typeof body.provider === 'string' ? body.provider : null;
+    useMirror = body.mirror === true;
   } catch {}
 
   try {
@@ -37,9 +39,28 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       await db.prepare('UPDATE skills SET downloads = downloads + 1 WHERE name = ?').bind(name).run();
 
       if (skill.source_type === 'github' && skill.source_url) {
+        const hasMirror = !!(skill.r2_key && bucket);
+
+        // Client requested mirror download (GitHub fallback)
+        if (useMirror && hasMirror) {
+          const r2Key = skill.r2_key || `skills/${name}/${skill.version}.zip`;
+          const object = await bucket!.get(r2Key);
+          if (object) {
+            return new Response(object.body, {
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/zip',
+                'Content-Disposition': `attachment; filename="${name}-${skill.version}.zip"`,
+                ...(skill.sha256 ? { 'X-Checksum-Sha256': skill.sha256 } : {}),
+              },
+            });
+          }
+        }
+
         return json({
           source_type: 'github',
           source_url: skill.source_url,
+          has_mirror: hasMirror,
         });
       }
 

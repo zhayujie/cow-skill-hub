@@ -31,6 +31,16 @@ const isGithub = skill.sourceType === 'github';
 const isRegistry = skill.sourceType === 'registry';
 const isExternal = isGithub || isRegistry;
 
+const providerLabel: Record<string, string> = {
+  github: 'GitHub',
+  clawhub: 'ClawHub',
+  linkai: 'LinkAI',
+};
+const providerName = providerLabel[skill.sourceProvider] || '';
+
+const sourceHomepage = skill.homepage
+  || (isGithub && skill.sourceUrl ? skill.sourceUrl : '');
+
 function getInstallCommand(skill: SkillData): string {
   if (skill.sourceProvider === 'clawhub') return `cow skill install clawhub:${skill.name}`;
   if (skill.sourceProvider === 'github') return `cow skill install github:${skill.name}`;
@@ -69,6 +79,11 @@ function formatFileSize(bytes: number): string {
             <span class={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
               {categoryLabel[skill.category]}
             </span>
+            {providerName && (
+              <span class="text-xs font-medium px-2.5 py-0.5 rounded-full border bg-gray-500/10 text-gray-400 border-gray-500/20">
+                via {providerName}
+              </span>
+            )}
           </div>
           <p class="text-gray-300 text-base leading-relaxed max-w-2xl mb-4">{skill.description}</p>
           <div class="flex items-center gap-5 text-sm text-gray-500">
@@ -110,31 +125,24 @@ function formatFileSize(bytes: number): string {
             </button>
           </div>
 
-          {isGithub && skill.sourceUrl && (
+          {sourceHomepage && (
             <a
-              href={skill.sourceUrl}
+              href={sourceHomepage}
               target="_blank"
               class="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition-colors mb-3"
             >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-              </svg>
-              GitHub
-            </a>
-          )}
-
-          {isRegistry && skill.homepage && (
-            <a
-              href={skill.homepage}
-              target="_blank"
-              class="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition-colors mb-3"
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-              查看源平台
+              {isGithub ? (
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              )}
+              {providerName ? `前往 ${providerName} 查看` : '前往源平台查看'}
             </a>
           )}
 
@@ -225,16 +233,20 @@ function formatFileSize(bytes: number): string {
           )}
         </>
       ) : (
-        <!-- External skill with no local content -->
+        <!-- No local content -->
         <div class="bg-surface-card border border-border rounded-xl p-10 text-center">
-          <p class="text-gray-500 mb-4">此技能由第三方平台提供，CowAgent 可通过 CLI 直接安装使用。</p>
-          {skill.homepage && (
+          <p class="text-gray-500 mb-4">
+            {isExternal
+              ? '此技能由第三方平台提供，CowAgent 可通过 CLI 直接安装使用。'
+              : '暂无技能详情内容。'}
+          </p>
+          {sourceHomepage && (
             <a
-              href={skill.homepage}
+              href={sourceHomepage}
               target="_blank"
               class="inline-flex items-center gap-2 text-primary hover:underline"
             >
-              前往源平台查看详情
+              {providerName ? `前往 ${providerName} 查看详情` : '前往源平台查看详情'}
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
                 <polyline points="15 3 21 3 21 9" />

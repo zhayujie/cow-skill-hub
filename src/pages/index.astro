@@ -112,49 +112,6 @@ for (const t of tags) { tagMap[t.id] = t.name; }
     </div>
   </section>
 
-  <!-- Install Modal -->
-  <div id="installModal" class="fixed inset-0 z-[100] hidden">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="modalOverlay"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-6">
-      <div class="relative bg-surface-card border border-border rounded-2xl w-full max-w-md p-8 shadow-2xl">
-        <!-- Close -->
-        <button id="modalClose" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300 transition-colors cursor-pointer">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-
-        <!-- Title -->
-        <h3 id="modalTitle" class="text-lg font-semibold text-gray-200 mb-6"></h3>
-
-        <!-- Install command -->
-        <p class="text-xs text-gray-500 mb-2">安装命令</p>
-        <div class="flex items-center justify-between bg-surface border border-border rounded-lg px-4 py-3 mb-6 min-w-0">
-          <div class="overflow-x-auto min-w-0 flex-1 scrollbar-thin">
-            <code id="modalCmd" class="text-sm font-mono text-gray-300 whitespace-nowrap"></code>
-          </div>
-          <button id="modalCopyBtn" class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0 ml-3" aria-label="Copy">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Action button -->
-        <a id="modalExternalBtn" href="#" target="_blank" class="hidden w-full text-center px-4 py-2.5 bg-surface text-gray-400 border border-border rounded-lg text-sm font-medium hover:text-gray-200 hover:border-border-light transition-colors items-center justify-center gap-1.5">
-          前往源平台查看
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
-
   <script is:inline>
     const searchInput = document.getElementById('searchInput');
     const skillsGrid = document.getElementById('skillsGrid');
@@ -234,60 +191,5 @@ for (const t of tags) { tagMap[t.id] = t.name; }
       }, 2000);
     });
 
-    // --- Install Modal ---
-    const modal = document.getElementById('installModal');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalClose = document.getElementById('modalClose');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalCmd = document.getElementById('modalCmd');
-    const modalCopyBtn = document.getElementById('modalCopyBtn');
-    const modalExternalBtn = document.getElementById('modalExternalBtn');
-
-    function openModal(card) {
-      const cmd = card.dataset.installCmd;
-      const displayName = card.dataset.skillDisplay;
-      const homepage = card.dataset.homepage;
-
-      modalTitle.textContent = displayName;
-      modalCmd.textContent = cmd;
-
-      if (homepage) {
-        modalExternalBtn.href = homepage;
-        modalExternalBtn.classList.remove('hidden');
-        modalExternalBtn.classList.add('flex');
-      } else {
-        modalExternalBtn.classList.add('hidden');
-        modalExternalBtn.classList.remove('flex');
-      }
-
-      modal.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-      modal.classList.add('hidden');
-      document.body.style.overflow = '';
-    }
-
-    document.querySelectorAll('.skill-card--external').forEach(card => {
-      card.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal(card);
-      });
-    });
-
-    modalOverlay.addEventListener('click', closeModal);
-    modalClose.addEventListener('click', closeModal);
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    modalCopyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(modalCmd.textContent);
-      const svg = modalCopyBtn.querySelector('svg');
-      const original = svg.innerHTML;
-      svg.innerHTML = '<polyline points="20 6 9 17 4 12" />';
-      setTimeout(() => { svg.innerHTML = original; }, 1500);
-    });
   </script>
 </Base>
