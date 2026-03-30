@@ -197,7 +197,7 @@ function formatFileSize(bytes: number): string {
           <!-- Tab: Summary -->
           {displaySummary && (
             <div id="tab-readme" class="tab-content">
-              <div class="summary-prose prose prose-invert prose-sm max-w-none prose-a:text-primary prose-a:decoration-primary/40 hover:prose-a:decoration-primary" set:html={summaryHtml} />
+              <div class="summary-prose prose prose-invert max-w-none prose-a:text-primary prose-a:decoration-primary/40 hover:prose-a:decoration-primary prose-pre:text-sm" set:html={summaryHtml} />
             </div>
           )}
 
