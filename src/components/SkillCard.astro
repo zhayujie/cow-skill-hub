@@ -24,7 +24,6 @@ const providerLabel: Record<string, string> = {
   linkai: 'LinkAI',
 };
 const providerName = providerLabel[skill.sourceProvider] || '';
-const showHomepageLink = !providerName && skill.homepage && skill.category === 'external';
 ---
 
 <a
@@ -60,9 +59,6 @@ const showHomepageLink = !providerName && skill.homepage && skill.category === '
       <span class="shrink-0">v{skill.version}</span>
       {providerName && (
         <span class="text-gray-600 shrink-0">{providerName}</span>
-      )}
-      {showHomepageLink && (
-        <a href={skill.homepage} target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-400 transition-colors shrink-0" onclick="event.stopPropagation()">主页 ↗</a>
       )}
     </div>
     <span class="shrink-0 ml-2 truncate max-w-[40%] text-right">{skill.author}</span>
