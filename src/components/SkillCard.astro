@@ -24,6 +24,7 @@ const providerLabel: Record<string, string> = {
   linkai: 'LinkAI',
 };
 const providerName = providerLabel[skill.sourceProvider] || '';
+const showHomepageLink = !providerName && skill.homepage && skill.category === 'external';
 ---
 
 <a
@@ -45,7 +46,9 @@ const providerName = providerLabel[skill.sourceProvider] || '';
       )}
     </div>
   </div>
-  <p class="text-xs text-gray-500 font-mono mb-4">{skill.name}</p>
+  <p class="text-xs text-gray-500 font-mono mb-4">
+    <span class="skill-name-copy cursor-pointer hover:text-gray-300 transition-colors" data-name={skill.name} onclick="event.preventDefault();navigator.clipboard.writeText(this.dataset.name);const o=this.textContent;this.textContent='已复制';setTimeout(()=>this.textContent=o,1000)">{skill.name}</span>
+  </p>
   <p class="text-sm text-gray-300 leading-relaxed mb-5 line-clamp-2 min-h-[2.8em]">{skill.description}</p>
   <div class="flex items-center gap-2 mb-4 flex-wrap min-h-[1.75rem]">
     {skill.tags.slice(0, 3).map(tag => (
@@ -57,6 +60,9 @@ const providerName = providerLabel[skill.sourceProvider] || '';
       <span>v{skill.version}</span>
       {providerName && (
         <span class="text-gray-600">{providerName}</span>
+      )}
+      {showHomepageLink && (
+        <a href={skill.homepage} target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-400 transition-colors" onclick="event.stopPropagation()">主页 ↗</a>
       )}
     </div>
     <span>{skill.author}</span>
