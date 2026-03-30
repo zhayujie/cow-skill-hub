@@ -6,6 +6,7 @@ const REGISTRY_PROVIDERS: Record<string, (slug: string) => string> = {
     const name = slug.includes('/') ? slug.split('/').pop()! : slug;
     return `https://wry-manatee-359.convex.site/api/v1/download?slug=${encodeURIComponent(name)}`;
   },
+  linkai: (slug) => `https://api.link-ai.tech/v1/skill/download?slug=${encodeURIComponent(slug)}`,
 };
 
 function resolveRegistryDownloadUrl(provider: string, slug: string | null): string | null {
