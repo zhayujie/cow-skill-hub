@@ -10,12 +10,12 @@ const { skill, tagMap = {} } = Astro.props;
 
 const categoryLabel: Record<string, string> = {
   community: '社区',
-  external: '第三方',
+  external: '三方',
 };
 
 const categoryColor: Record<string, string> = {
   community: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  external: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  external: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
 };
 
 const providerLabel: Record<string, string> = {
@@ -38,9 +38,11 @@ const providerName = providerLabel[skill.sourceProvider] || '';
       {skill.featured && (
         <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">推荐</span>
       )}
-      <span class={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
-        {categoryLabel[skill.category]}
-      </span>
+      {skill.category === 'community' && (
+        <span class={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
+          {categoryLabel[skill.category]}
+        </span>
+      )}
     </div>
   </div>
   <p class="text-xs text-gray-500 font-mono mb-4">{skill.name}</p>
@@ -54,7 +56,7 @@ const providerName = providerLabel[skill.sourceProvider] || '';
     <div class="flex items-center gap-4">
       <span>v{skill.version}</span>
       {providerName && (
-        <span class="text-gray-600">via {providerName}</span>
+        <span class="text-gray-600">{providerName}</span>
       )}
     </div>
     <span>{skill.author}</span>
