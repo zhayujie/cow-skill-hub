@@ -68,12 +68,33 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       }
 
       if (skill.source_type === 'registry') {
+        const hasMirror = !!(skill.r2_key && bucket);
+
+        if (useMirror && hasMirror) {
+          const r2Key = skill.r2_key || `skills/${name}.zip`;
+          let object = await bucket!.get(r2Key);
+          if (!object && !skill.r2_key) {
+            object = await bucket!.get(`skills/${name}/${skill.version}.zip`);
+          }
+          if (object) {
+            return new Response(object.body, {
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/zip',
+                'Content-Disposition': `attachment; filename="${name}-${skill.version}.zip"`,
+                ...(skill.sha256 ? { 'X-Checksum-Sha256': skill.sha256 } : {}),
+              },
+            });
+          }
+        }
+
         const downloadUrl = resolveRegistryDownloadUrl(skill.source_provider, skill.source_url);
         if (downloadUrl) {
           return json({
             source_type: 'registry',
             source_provider: skill.source_provider,
             download_url: downloadUrl,
+            has_mirror: hasMirror,
             ...(skill.sha256 ? { sha256: skill.sha256 } : {}),
           });
         }
