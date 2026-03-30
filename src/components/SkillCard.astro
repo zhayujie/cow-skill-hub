@@ -55,16 +55,16 @@ const showHomepageLink = !providerName && skill.homepage && skill.category === '
       <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tag}</span>
     ))}
   </div>
-  <div class="flex items-center justify-between text-xs text-gray-500 mt-auto">
-    <div class="flex items-center gap-4">
-      <span>v{skill.version}</span>
+  <div class="flex items-center justify-between text-xs text-gray-500 mt-auto min-w-0">
+    <div class="flex items-center gap-3 min-w-0 overflow-hidden">
+      <span class="shrink-0">v{skill.version}</span>
       {providerName && (
-        <span class="text-gray-600">{providerName}</span>
+        <span class="text-gray-600 shrink-0">{providerName}</span>
       )}
       {showHomepageLink && (
-        <a href={skill.homepage} target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-400 transition-colors" onclick="event.stopPropagation()">主页 ↗</a>
+        <a href={skill.homepage} target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:text-gray-400 transition-colors shrink-0" onclick="event.stopPropagation()">主页 ↗</a>
       )}
     </div>
-    <span>{skill.author}</span>
+    <span class="shrink-0 ml-2 truncate max-w-[40%] text-right">{skill.author}</span>
   </div>
 </a>
