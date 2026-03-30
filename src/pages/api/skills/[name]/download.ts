@@ -43,8 +43,11 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
         // Client requested mirror download (GitHub fallback)
         if (useMirror && hasMirror) {
-          const r2Key = skill.r2_key || `skills/${name}/${skill.version}.zip`;
-          const object = await bucket!.get(r2Key);
+          const r2Key = skill.r2_key || `skills/${name}.zip`;
+          let object = await bucket!.get(r2Key);
+          if (!object && !skill.r2_key) {
+            object = await bucket!.get(`skills/${name}/${skill.version}.zip`);
+          }
           if (object) {
             return new Response(object.body, {
               headers: {
@@ -84,8 +87,11 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
       if (!bucket) return json({ error: 'Storage not available' }, 500);
 
-      const r2Key = skill.r2_key || `skills/${name}/${skill.version}.zip`;
-      const object = await bucket.get(r2Key);
+      const r2Key = skill.r2_key || `skills/${name}.zip`;
+      let object = await bucket.get(r2Key);
+      if (!object && !skill.r2_key) {
+        object = await bucket.get(`skills/${name}/${skill.version}.zip`);
+      }
       if (!object) return json({ error: 'Package not found' }, 404);
 
       return new Response(object.body, {
