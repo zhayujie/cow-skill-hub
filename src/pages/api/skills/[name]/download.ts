@@ -88,7 +88,9 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
           }
         }
 
-        const downloadUrl = resolveRegistryDownloadUrl(skill.source_provider, skill.source_url);
+        // source_url is a direct zip URL — use it as download link
+        const directUrl = (skill.source_url?.startsWith('https://') && skill.source_url?.endsWith('.zip')) ? skill.source_url : null;
+        const downloadUrl = directUrl || resolveRegistryDownloadUrl(skill.source_provider, skill.source_url);
         if (downloadUrl) {
           return json({
             source_type: 'registry',
@@ -127,7 +129,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
     // Skill not in DB — try provider fallback for supported registries
     if (provider && REGISTRY_PROVIDERS[provider]) {
-      const downloadUrl = REGISTRY_PROVIDERS[provider](name);
+      const downloadUrl = REGISTRY_PROVIDERS[provider](name!);
       return json({
         source_type: 'registry',
         source_provider: provider,
