@@ -3,6 +3,7 @@ import Base from '@/layouts/Base.astro';
 import { tagOptions } from '@/data/skills';
 import type { SkillData } from '@/data/skills';
 import { getSkillByName, getTagDefinitions } from '@/data/db';
+import { marked } from 'marked';
 
 const { name } = Astro.params;
 const runtime = Astro.locals?.runtime;
@@ -49,6 +50,7 @@ function getInstallCommand(skill: SkillData): string {
 
 const installCmd = getInstallCommand(skill);
 const displaySummary = skill.summary;
+const summaryHtml = displaySummary ? marked.parse(displaySummary) : '';
 const singleSkillMd = skill.files.length === 1 && skill.files[0].path.toLowerCase() === 'skill.md';
 
 function formatFileSize(bytes: number): string {
@@ -195,9 +197,7 @@ function formatFileSize(bytes: number): string {
           <!-- Tab: Summary -->
           {displaySummary && (
             <div id="tab-readme" class="tab-content">
-              <div class="prose prose-invert prose-sm max-w-none prose-p:text-gray-400 prose-p:leading-relaxed">
-                <p class="text-gray-300 leading-relaxed whitespace-pre-line">{displaySummary}</p>
-              </div>
+              <div class="prose prose-invert prose-sm max-w-none prose-headings:text-gray-200 prose-p:text-gray-400 prose-p:leading-relaxed prose-strong:text-gray-300 prose-code:text-primary prose-code:bg-surface prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-surface prose-pre:border prose-pre:border-border prose-pre:rounded-lg prose-a:text-primary prose-li:text-gray-400 prose-ul:text-gray-400" set:html={summaryHtml} />
             </div>
           )}
 
