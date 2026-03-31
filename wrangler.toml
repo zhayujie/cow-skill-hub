@@ -1,6 +1,9 @@
 name = "cow-skill-hub"
 compatibility_date = "2024-10-01"
 
+# Secrets (Dashboard or `wrangler secret put`): JWT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET,
+# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+
 [[d1_databases]]
 binding = "DB"
 database_name = "cow-skill-hub"

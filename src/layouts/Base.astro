@@ -5,6 +5,7 @@ interface Props {
 }
 
 const { title, description = 'Browse, search, and install skills for CowAgent' } = Astro.props;
+const user = Astro.locals.user ?? null;
 ---
 
 <!DOCTYPE html>
@@ -31,20 +32,86 @@ const { title, description = 'Browse, search, and install skills for CowAgent' }
         <img src="/logo/cow-logo.png" alt="CowAgent" class="w-8 h-8 rounded-lg" />
         <span class="text-gray-200">Skill Hub</span>
       </a>
-      <div class="flex items-center gap-6">
-        <a href="/" class="text-sm text-gray-400 hover:text-gray-200 transition-colors">Skills</a>
-        <a href="https://docs.cowagent.ai" target="_blank" class="text-sm text-gray-400 hover:text-gray-200 transition-colors">Docs</a>
-        <a href="https://cowagent.ai" target="_blank" class="text-sm text-gray-400 hover:text-gray-200 transition-colors">CowAgent</a>
+      <div class="flex items-center gap-4 sm:gap-6 md:gap-8">
+        <a href="/submit" class="text-sm text-primary hover:text-primary-light transition-colors whitespace-nowrap">提交技能</a>
+        <a href="https://docs.cowagent.ai/skills" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">文档</a>
+        <a href="https://cowagent.ai" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors hidden sm:inline whitespace-nowrap">CowAgent</a>
         <a
-          href="https://github.com/zhayujie/chatgpt-on-wechat"
+          href="https://github.com/zhayujie/cow-skill-hub"
           target="_blank"
-          class="flex items-center gap-1.5 text-gray-400 hover:text-gray-200 transition-colors px-2.5 py-1 border border-border-light rounded-md text-sm"
-          aria-label="GitHub"
+          rel="noopener noreferrer"
+          class="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors shrink-0"
+          aria-label="CowAgent Skill Hub 源码仓库"
         >
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
         </a>
+        {user ? (
+          <div class="relative shrink-0" id="navUserWrap">
+            <button
+              type="button"
+              id="navUserToggle"
+              class="flex items-center rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary/40"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-label="账号菜单"
+            >
+              {user.avatar ? (
+                <div class="relative h-8 w-8 shrink-0">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-secondary text-xs text-gray-400" aria-hidden="true">
+                    {(user.name || user.username).charAt(0).toUpperCase()}
+                  </span>
+                  <img
+                    src={`/api/auth/avatar?v=${encodeURIComponent(user.sub)}`}
+                    alt=""
+                    width="32"
+                    height="32"
+                    loading="lazy"
+                    decoding="async"
+                    referrerpolicy="no-referrer"
+                    class="absolute inset-0 h-8 w-8 rounded-full object-cover"
+                    onerror="this.remove()"
+                  />
+                </div>
+              ) : (
+                <span class="w-8 h-8 rounded-full bg-surface-secondary flex items-center justify-center text-xs text-gray-400">
+                  {(user.name || user.username).charAt(0).toUpperCase()}
+                </span>
+              )}
+            </button>
+            <div
+              id="navUserMenu"
+              class="hidden absolute right-0 top-full mt-1.5 min-w-[10rem] py-1 rounded-xl border border-border bg-surface-card shadow-lg z-[60]"
+              role="menu"
+            >
+              <p class="px-3 py-2 text-xs text-gray-500 border-b border-border truncate" title={user.name || user.username}>{user.name || user.username}</p>
+              <button type="button" id="navLogoutBtn" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-surface-secondary cursor-pointer" role="menuitem">
+                退出登录
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div class="relative shrink-0" id="navLoginWrap">
+            <button
+              type="button"
+              id="navLoginToggle"
+              class="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-lg border border-border hover:border-border-light transition-colors whitespace-nowrap"
+              aria-expanded="false"
+              aria-haspopup="true"
+            >
+              登录
+            </button>
+            <div
+              id="navLoginMenu"
+              class="hidden absolute right-0 top-full mt-1.5 min-w-[9rem] py-1 rounded-xl border border-border bg-surface-card shadow-lg z-[60]"
+              role="menu"
+            >
+              <a href="/api/auth/github" class="block px-3 py-2 text-sm text-gray-300 hover:bg-surface-secondary" role="menuitem">GitHub</a>
+              <a href="/api/auth/google" class="block px-3 py-2 text-sm text-gray-300 hover:bg-surface-secondary" role="menuitem">Google</a>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   </nav>
@@ -61,13 +128,57 @@ const { title, description = 'Browse, search, and install skills for CowAgent' }
       </div>
       <div class="flex gap-6">
         <a href="https://cowagent.ai" target="_blank" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">CowAgent</a>
-        <a href="https://docs.cowagent.ai" target="_blank" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">Docs</a>
-        <a href="https://github.com/zhayujie/chatgpt-on-wechat" target="_blank" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">GitHub</a>
+        <a href="https://docs.cowagent.ai/skills" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">文档</a>
+        <a href="https://github.com/zhayujie/cow-skill-hub" target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">GitHub</a>
       </div>
     </div>
     <div class="max-w-content mx-auto mt-6 pt-5 border-t border-border text-center">
       <p class="text-xs text-gray-600">&copy; 2026 CowAgent. Open source under MIT License.</p>
     </div>
   </footer>
+
+  <script is:inline>
+    (function () {
+      function closeAllNavMenus() {
+        document.getElementById('navLoginMenu')?.classList.add('hidden');
+        document.getElementById('navLoginToggle')?.setAttribute('aria-expanded', 'false');
+        document.getElementById('navUserMenu')?.classList.add('hidden');
+        document.getElementById('navUserToggle')?.setAttribute('aria-expanded', 'false');
+      }
+
+      document.getElementById('navLoginToggle')?.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const menu = document.getElementById('navLoginMenu');
+        const open = menu?.classList.toggle('hidden') === false;
+        this.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.getElementById('navUserMenu')?.classList.add('hidden');
+      });
+
+      document.getElementById('navUserToggle')?.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const menu = document.getElementById('navUserMenu');
+        const open = menu?.classList.toggle('hidden') === false;
+        this.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.getElementById('navLoginMenu')?.classList.add('hidden');
+      });
+
+      document.addEventListener('click', function () {
+        closeAllNavMenus();
+      });
+
+      document.getElementById('navLoginMenu')?.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+      document.getElementById('navUserMenu')?.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+
+      document.getElementById('navLogoutBtn')?.addEventListener('click', async function (e) {
+        e.stopPropagation();
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/';
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -1,14 +1,16 @@
 -- CowAgent Skill Hub - D1 Database Schema
 
--- Users (for future GitHub OAuth login and skill ownership)
+-- Users (OAuth login and skill ownership)
 CREATE TABLE IF NOT EXISTS users (
-  id            TEXT PRIMARY KEY,                     -- GitHub user ID or internal ID
-  username      TEXT NOT NULL UNIQUE,                 -- GitHub username or display slug
+  id            TEXT PRIMARY KEY,                     -- e.g. github:123 or google:sub
+  provider      TEXT NOT NULL DEFAULT 'github' CHECK (provider IN ('github', 'google')),
+  username      TEXT NOT NULL,
   display_name  TEXT NOT NULL DEFAULT '',
   avatar_url    TEXT,
   github_url    TEXT,
   role          TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
-  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(provider, username)
 );
 
 CREATE TABLE IF NOT EXISTS skills (
