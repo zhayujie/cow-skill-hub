@@ -92,7 +92,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
         // source_url is a direct zip URL — use it as download link
         const directUrl = (skill.source_url?.startsWith('https://') && skill.source_url?.endsWith('.zip')) ? skill.source_url : null;
-        const downloadUrl = directUrl || resolveRegistryDownloadUrl(skill.source_provider, skill.source_url);
+        const downloadUrl = directUrl || resolveRegistryDownloadUrl(skill.source_provider, name!);
         if (downloadUrl) {
           return json({
             source_type: 'registry',
