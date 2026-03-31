@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
   try {
     const skill: any = await db.prepare(
-      'SELECT name, version, source_type, source_provider, source_url, source_path, r2_key, sha256 FROM skills WHERE name = ? AND status = ?'
+      'SELECT name, display_name, version, source_type, source_provider, source_url, source_path, r2_key, sha256 FROM skills WHERE name = ? AND status = ?'
     ).bind(name, 'published').first();
 
     if (skill) {
@@ -65,6 +65,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
           source_type: 'github',
           source_url: skill.source_url,
           has_mirror: hasMirror,
+          display_name: skill.display_name || '',
         });
       }
 
@@ -98,6 +99,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
             source_provider: skill.source_provider,
             download_url: downloadUrl,
             has_mirror: hasMirror,
+            display_name: skill.display_name || '',
             ...(skill.sha256 ? { sha256: skill.sha256 } : {}),
           });
         }
@@ -105,6 +107,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
           source_type: 'registry',
           source_provider: skill.source_provider,
           source_url: skill.source_url,
+          display_name: skill.display_name || '',
           message: 'Unsupported registry provider',
         }, 400);
       }
