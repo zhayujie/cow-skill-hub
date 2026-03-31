@@ -10,7 +10,11 @@ export const GET: APIRoute = async ({ params, locals }) => {
 
   try {
     const { results } = await db.prepare(
-      'SELECT path, content, size FROM skill_files WHERE skill_name = ? ORDER BY path LIMIT 100'
+      `SELECT sf.path, sf.content, sf.size
+       FROM skill_files sf
+       INNER JOIN skills s ON s.name = sf.skill_name
+       WHERE sf.skill_name = ? AND s.status = 'published'
+       ORDER BY sf.path LIMIT 100`
     ).bind(name).all();
 
     return json({ files: results });

@@ -2,49 +2,94 @@
   <img src="public/logo/cow-logo.png" alt="CowAgent Skill Hub" width="80" />
 </p>
 
-<h1 align="center">CowAgent Skill Hub</h1>
+<h1 align="center">Cow Skill Hub</h1>
 
 <p align="center">
-  Browse, search, and install skills for <a href="https://cowagent.ai">CowAgent</a>
+  [English] | [<a href="./README-ZH.md">中文</a>]
 </p>
 
 <p align="center">
-  <a href="https://skills.cowagent.ai">skills.cowagent.ai</a> ·
-  <a href="https://cowagent.ai">CowAgent</a> ·
-  <a href="https://docs.cowagent.ai">Docs</a> ·
-  <a href="https://github.com/zhayujie/chatgpt-on-wechat">GitHub</a>
+  An open platform to discover, browse, and install AI Agent Skills
 </p>
 
-## What is this
+<p align="center">
+  <a href="https://skills.cowagent.ai">Skill Hub</a> ·
+  <a href="https://skills.cowagent.ai/submit">Submit a Skill</a> ·
+  <a href="https://github.com/zhayujie/chatgpt-on-wechat">CowAgent</a> ·
+  <a href="https://docs.cowagent.ai/skills">Docs</a>
+</p>
 
-CowAgent Skill Hub is the official skill marketplace for [CowAgent](https://github.com/zhayujie/chatgpt-on-wechat). Users can browse, search, and install skills to extend their CowAgent with new capabilities.
+---
+
+## Introduction
+
+**Cow Skill Hub** is the official skill marketplace for [CowAgent](https://github.com/zhayujie/chatgpt-on-wechat), featuring official, community-contributed, and third-party Skills.
+
+Skills are capability packages for AI Agents — they enable Agents to call external tools, services, and CLIs.
 
 ## Features
 
-- Browse recommended, community, and third-party skills
-- Search by name, description, or tags
-- Filter by category and tags
-- View skill documentation and file previews
-- One-command install: `cow skill install <name>`
+- **Browse** skills by category (Recommended / Community / Third-party) and tags
+- **Search** by name or description
+- **View** skill docs, file contents, install commands, and required environment variables
+- **Submit** your own skill — upload a package and it will be reviewed and published
+- **One-command install** — copy the install command and run it in CowAgent
 
-## Architecture
+## Using Skills in CowAgent
 
-| Component | Technology |
-|-----------|-----------|
-| Frontend | Astro + Tailwind CSS |
-| API | Cloudflare Workers |
-| Database | Cloudflare D1 (SQLite) |
-| Storage | Cloudflare R2 (skill zip packages) |
-| Hosting | Cloudflare Pages |
+### Install a skill
 
-## Skill Types
+```bash
+# Install a community skill from the Skill Hub
+cow skill install <skill-name>
 
-| Type | Storage | Install |
-|------|---------|---------|
-| Community | Files stored in R2 | `cow skill install web-search` |
-| External (GitHub) | Link only | `cow skill install github:owner/repo` |
-| External (ClawHub) | Link only | `cow skill install clawhub:skill-name` |
-| External (LinkAI) | Link only | `cow skill install linkai:skill-name` |
+# Example: install the Lark CLI skill
+cow skill install lark-cli
+
+# Install from GitHub
+cow skill install github:<owner/repo>
+
+# Install from ClawHub
+cow skill install clawhub:<skill-name>
+```
+
+### List installed skills
+
+```bash
+cow skill list
+```
+
+### Uninstall a skill
+
+```bash
+cow skill uninstall <skill-name>
+```
+
+Once installed, CowAgent automatically recognizes and invokes the skill when relevant. No extra configuration needed — just restart the service.
+
+> See the [CowAgent Docs](https://docs.cowagent.ai/skills) for detailed usage.
+
+## Using Skills in Other Agents
+
+Skills are built around a `SKILL.md` file — a Markdown prompt describing what the Agent can do. You can download the file from the skill detail page (click the **Files** tab) and use it in any Agent that supports system prompts or custom instructions, including OpenClaw, Cursor, Claude Code, and more.
+
+## Submit Your Skill
+
+Contributions are welcome!
+
+1. Go to [skills.cowagent.ai/submit](https://skills.cowagent.ai/submit)
+2. Sign in with GitHub or Google
+3. Upload a folder or zip with `SKILL.md` at the root
+4. Fill in the skill name, display name, and description
+5. Submit — it will go through automated safety checks and manual review before being published
+
+**Required structure:**
+
+```
+your-skill/
+├── SKILL.md        # required, must be at the root
+└── ...             # other optional files
+```
 
 ## Local Development
 
@@ -52,29 +97,20 @@ CowAgent Skill Hub is the official skill marketplace for [CowAgent](https://gith
 # Install dependencies
 npm install
 
-# Start dev server (frontend)
+# Start the dev server
 npm run dev
 
-# Start Workers dev server (API)
-npx wrangler dev workers/api.js
-
-# Initialize D1 database
+# Initialize the local database
 npx wrangler d1 execute cow-skill-hub --local --file=schema.sql
 ```
 
 ## Deployment
 
 ```bash
-# Deploy frontend to Cloudflare Pages
 npm run build
-
-# Deploy Workers API
 npx wrangler deploy
-
-# Initialize production D1
-npx wrangler d1 execute cow-skill-hub --file=schema.sql
 ```
 
 ## License
 
-MIT
+[MIT](./LICENSE) © 2026 zhayujie

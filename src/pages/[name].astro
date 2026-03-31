@@ -5,6 +5,9 @@ import type { SkillData } from '@/data/skills';
 import { getSkillByName, getTagDefinitions } from '@/data/db';
 import { marked } from 'marked';
 
+// Strip raw HTML from markdown to prevent stored XSS
+marked.use({ renderer: { html: () => '' } });
+
 const { name } = Astro.params;
 const runtime = Astro.locals?.runtime;
 const db = runtime?.env?.DB || null;
