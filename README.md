@@ -13,19 +13,17 @@
 </p>
 
 <p align="center">
-  <a href="https://skills.cowagent.ai">Skill Hub</a> ·
-  <a href="https://skills.cowagent.ai/submit">Submit a Skill</a> ·
-  <a href="https://github.com/zhayujie/chatgpt-on-wechat">CowAgent</a> ·
-  <a href="https://docs.cowagent.ai/skills">Docs</a>
+  <a href="https://skills.cowagent.ai">🧩 Skill Hub</a> &nbsp;·&nbsp;
+  <a href="https://skills.cowagent.ai/submit">📦 Submit a Skill</a> &nbsp;·&nbsp;
+  <a href="https://github.com/zhayujie/chatgpt-on-wechat">🤖 CowAgent</a> &nbsp;·&nbsp;
+  <a href="https://docs.cowagent.ai/skills">📖 Docs</a>
 </p>
 
 ---
 
 ## Introduction
 
-**Cow Skill Hub** is the official skill marketplace for [CowAgent](https://github.com/zhayujie/chatgpt-on-wechat), featuring official, community-contributed, and third-party Skills.
-
-Skills are capability packages for AI Agents — they enable Agents to call external tools, services, and CLIs.
+**Cow Skill Hub** is an open skill marketplace for AI Agents — including CowAgent, OpenClaw, Claude Code, and more — featuring official, community-contributed, and third-party Skills from GitHub, ClawHub, and other platforms.
 
 ## Features
 
@@ -35,16 +33,33 @@ Skills are capability packages for AI Agents — they enable Agents to call exte
 - **Submit** your own skill — upload a package and it will be reviewed and published
 - **One-command install** — copy the install command and run it in CowAgent
 
+## Submit Your Skill
+
+Contributions are welcome!
+
+1. Go to [skills.cowagent.ai/submit](https://skills.cowagent.ai/submit)
+2. Sign in with GitHub or Google
+3. Upload a folder or zip with `SKILL.md` at the root
+4. Fill in the skill name, display name, and description
+5. Submit — it will go through safety checks and review before being published
+
+**Required structure:**
+
+```
+your-skill/
+├── SKILL.md        # required, must be at the root
+└── ...             # other optional files
+```
+
 ## Using Skills in CowAgent
+
+> CowAgent project: [github.com/zhayujie/chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat)
 
 ### Install a skill
 
 ```bash
-# Install a community skill from the Skill Hub
+# Install a skill from the Skill Hub
 cow skill install <skill-name>
-
-# Example: install the Lark CLI skill
-cow skill install lark-cli
 
 # Install from GitHub
 cow skill install github:<owner/repo>
@@ -72,24 +87,6 @@ Once installed, CowAgent automatically recognizes and invokes the skill when rel
 ## Using Skills in Other Agents
 
 Skills are built around a `SKILL.md` file — a Markdown prompt describing what the Agent can do. You can download the file from the skill detail page (click the **Files** tab) and use it in any Agent that supports system prompts or custom instructions, including OpenClaw, Cursor, Claude Code, and more.
-
-## Submit Your Skill
-
-Contributions are welcome!
-
-1. Go to [skills.cowagent.ai/submit](https://skills.cowagent.ai/submit)
-2. Sign in with GitHub or Google
-3. Upload a folder or zip with `SKILL.md` at the root
-4. Fill in the skill name, display name, and description
-5. Submit — it will go through automated safety checks and manual review before being published
-
-**Required structure:**
-
-```
-your-skill/
-├── SKILL.md        # required, must be at the root
-└── ...             # other optional files
-```
 
 ## Local Development
 
