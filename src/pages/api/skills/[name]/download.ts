@@ -21,7 +21,9 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
   if (!db) return json({ error: 'DB not available' }, 500);
 
   const { name } = params;
-  if (!isValidSkillName(name)) return json({ error: 'Invalid skill name' }, 400);
+  // Allow mixed-case alphanumeric codes for registry providers (e.g. LinkAI codes like "Ou6axjdPNk")
+  const isRegistryCode = /^[a-zA-Z0-9][a-zA-Z0-9_\-]{0,127}$/.test(name ?? '');
+  if (!isValidSkillName(name) && !isRegistryCode) return json({ error: 'Invalid skill name' }, 400);
 
   let provider: string | null = null;
   let useMirror = false;
