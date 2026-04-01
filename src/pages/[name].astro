@@ -117,17 +117,22 @@ function formatFileSize(bytes: number): string {
                 <span class="text-primary">$</span> {installCmd}
               </code>
             </div>
-            <button
-              id="copyBtn"
-              data-command={installCmd}
-              class="text-gray-500 hover:text-primary transition-colors cursor-pointer shrink-0 ml-3"
-              aria-label="Copy"
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-              </svg>
-            </button>
+            <div class="relative group shrink-0 ml-3">
+              <button
+                id="copyBtn"
+                data-command={installCmd}
+                class="text-gray-500 hover:text-primary transition-colors cursor-pointer"
+                aria-label="Copy"
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                </svg>
+              </button>
+              <div class="absolute bottom-full right-0 mb-2 w-48 text-center text-xs text-gray-300 bg-gray-800 border border-border rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg">
+                终端输入或发送给 CowAgent 一键安装
+              </div>
+            </div>
           </div>
 
           {sourceHomepage && (
@@ -297,6 +302,12 @@ function formatFileSize(bytes: number): string {
     if (copyBtn) {
       copyBtn.addEventListener('click', function() {
         navigator.clipboard.writeText(this.dataset.command);
+        this.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="20 6 9 17 4 12"/></svg>`;
+        this.classList.add('text-primary');
+        setTimeout(() => {
+          this.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`;
+          this.classList.remove('text-primary');
+        }, 2000);
       });
     }
   </script>

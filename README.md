@@ -16,7 +16,7 @@
   <a href="https://skills.cowagent.ai">🧩 Skill Hub</a> &nbsp;·&nbsp;
   <a href="https://skills.cowagent.ai/submit">📦 Submit a Skill</a> &nbsp;·&nbsp;
   <a href="https://github.com/zhayujie/chatgpt-on-wechat">🤖 CowAgent</a> &nbsp;·&nbsp;
-  <a href="https://docs.cowagent.ai/skills">📖 Docs</a>
+  <a href="https://docs.cowagent.ai/skills/hub">📖 Docs</a>
 </p>
 
 ---
@@ -66,6 +66,9 @@ cow skill install github:<owner/repo>
 
 # Install from ClawHub
 cow skill install clawhub:<skill-name>
+
+# Install from LinkAI
+cow skill install linkai:<code>
 ```
 
 ### List installed skills

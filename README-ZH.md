@@ -16,7 +16,7 @@
   <a href="https://skills.cowagent.ai">🧩 技能广场</a> &nbsp;·&nbsp;
   <a href="https://skills.cowagent.ai/submit">📦 提交技能</a> &nbsp;·&nbsp;
   <a href="https://github.com/zhayujie/chatgpt-on-wechat">🤖 CowAgent</a> &nbsp;·&nbsp;
-  <a href="https://docs.cowagent.ai/skills">📖 文档</a>
+  <a href="https://docs.cowagent.ai/skills/hub">📖 文档</a>
 </p>
 
 ---
@@ -66,6 +66,9 @@ cow skill install github:<owner/repo>
 
 # 安装来自 ClawHub 的技能
 cow skill install clawhub:<skill-name>
+
+# 安装来自 LinkAI 的技能
+cow skill install linkai:<code>
 ```
 
 ### 查看已安装的技能
