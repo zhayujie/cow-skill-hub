@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://skills.cowagent.ai">🧩 技能广场</a> &nbsp;·&nbsp;
   <a href="https://skills.cowagent.ai/submit">📦 提交技能</a> &nbsp;·&nbsp;
-  <a href="https://github.com/zhayujie/chatgpt-on-wechat">🤖 CowAgent</a> &nbsp;·&nbsp;
+  <a href="https://github.com/zhayujie/CowAgent">🤖 CowAgent</a> &nbsp;·&nbsp;
   <a href="https://docs.cowagent.ai/skills/hub">📖 文档</a>
 </p>
 
@@ -53,7 +53,7 @@ your-skill/
 
 ## 在 CowAgent 中使用技能
 
-> CowAgent 项目地址：[github.com/zhayujie/chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat)
+> CowAgent 项目地址：[github.com/zhayujie/CowAgent](https://github.com/zhayujie/CowAgent)
 
 ### 安装技能
 

@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://skills.cowagent.ai">🧩 Skill Hub</a> &nbsp;·&nbsp;
   <a href="https://skills.cowagent.ai/submit">📦 Submit a Skill</a> &nbsp;·&nbsp;
-  <a href="https://github.com/zhayujie/chatgpt-on-wechat">🤖 CowAgent</a> &nbsp;·&nbsp;
+  <a href="https://github.com/zhayujie/CowAgent">🤖 CowAgent</a> &nbsp;·&nbsp;
   <a href="https://docs.cowagent.ai/skills/hub">📖 Docs</a>
 </p>
 
@@ -53,7 +53,7 @@ your-skill/
 
 ## Using Skills in CowAgent
 
-> CowAgent project: [github.com/zhayujie/chatgpt-on-wechat](https://github.com/zhayujie/chatgpt-on-wechat)
+> CowAgent project: [github.com/zhayujie/CowAgent](https://github.com/zhayujie/CowAgent)
 
 ### Install a skill
 

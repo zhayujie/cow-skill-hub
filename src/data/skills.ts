@@ -70,7 +70,7 @@ export const skills: SkillData[] = [
     requiresEnv: ['GOOGLE_API_KEY'],
     requiresBins: [],
     platforms: ['darwin', 'linux', 'windows'],
-    homepage: 'https://github.com/zhayujie/chatgpt-on-wechat',
+    homepage: 'https://github.com/zhayujie/CowAgent',
     sourceType: 'zip',
     sourceProvider: 'cowagent',
     files: [
