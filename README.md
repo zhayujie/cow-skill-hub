@@ -25,6 +25,8 @@
 
 **Cow Skill Hub** is an open skill marketplace for AI Agents — including CowAgent, OpenClaw, Claude Code, and more — featuring official, community-contributed, and third-party Skills from GitHub, ClawHub, and other platforms.
 
+Chinese users can also search and install skills through [Skills宝](https://skilery.com).
+
 ## Features
 
 - **Browse** skills by category (Recommended / Community / Third-party) and tags
