@@ -71,6 +71,8 @@ cow skill install clawhub:<skill-name>
 cow skill install linkai:<code>
 ```
 
+中文用户也可以通过 Skills宝 发现更多 skills：https://skilery.com
+
 ### 查看已安装的技能
 
 ```bash
