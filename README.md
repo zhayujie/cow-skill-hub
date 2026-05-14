@@ -91,6 +91,12 @@ Once installed, CowAgent automatically recognizes and invokes the skill when rel
 
 Skills are built around a `SKILL.md` file — a Markdown prompt describing what the Agent can do. You can download the file from the skill detail page (click the **Files** tab) and use it in any Agent that supports system prompts or custom instructions, including OpenClaw, Cursor, Claude Code, and more.
 
+For OpenClaw plugins, use the plugin's native install command. Example:
+
+```bash
+openclaw plugins install @xquik/tweetclaw
+```
+
 ## Local Development
 
 ```bash

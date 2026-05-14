@@ -37,6 +37,7 @@ const isExternal = isGithub || isRegistry;
 
 const providerLabel: Record<string, string> = {
   github: 'GitHub',
+  openclaw: 'OpenClaw',
   clawhub: 'ClawHub',
   linkai: 'LinkAI',
 };
@@ -46,6 +47,7 @@ const sourceHomepage = skill.homepage
   || (isGithub && skill.sourceUrl ? skill.sourceUrl : '');
 
 function getInstallCommand(skill: SkillData): string {
+  if (skill.sourceProvider === 'openclaw') return `openclaw plugins install ${skill.sourceUrl || skill.name}`;
   if (skill.sourceProvider === 'clawhub') return `cow skill install clawhub:${skill.name}`;
   if (skill.sourceProvider === 'github') return `cow skill install github:${skill.name}`;
   return `cow skill install ${skill.name}`;

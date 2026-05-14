@@ -11,4 +11,7 @@ INSERT INTO skills (name, display_name, description, summary, version, author, c
 VALUES ('auto-coder', 'Auto Coder', '基于 GitHub 仓库的自动化编程助手', '自动分析代码仓库并生成修复补丁、新功能代码。', '0.9.0', 'octocat', 'external', '["coding","ai"]', 1, 40, 'published', 'github', 'github', 'octocat/auto-coder', 'https://github.com/octocat/auto-coder');
 
 INSERT INTO skills (name, display_name, description, summary, version, author, category, tags, featured, sort_order, status, source_type, source_provider, source_url, homepage)
-VALUES ('peekaboo', 'Peekaboo', 'ClawHub 社区最受欢迎的网页内容提取技能', '由 ClawHub 社区开发的网页内容提取和分析工具。', '2.1.0', 'ClawHub/peekaboo', 'external', '["web","data"]', 0, 50, 'published', 'registry', 'clawhub', 'peekaboo', 'https://clawhub.ai/peekaboo');
+VALUES ('tweetclaw', 'TweetClaw', 'OpenClaw X/Twitter 自动化插件，支持搜索推文、发布回复、粉丝导出、媒体、私信、监控、Webhook 和抽奖。', 'TweetClaw 是面向 OpenClaw 的 X/Twitter 自动化插件和 npm 包。安装命令：openclaw plugins install @xquik/tweetclaw。配置 XQUIK_API_KEY 后，可搜索推文和回复、发布推文或回复、导出粉丝、查询用户、上传或下载媒体、发送私信、监控推文、处理 Webhook，并执行抽奖。', '1.6.29', 'Xquik', 'external', '["communication","automation","api"]', 0, 45, 'published', 'registry', 'openclaw', '@xquik/tweetclaw', 'https://clawhub.ai/plugins/@xquik/tweetclaw');
+
+INSERT INTO skills (name, display_name, description, summary, version, author, category, tags, featured, sort_order, status, source_type, source_provider, source_url, homepage)
+VALUES ('peekaboo', 'Peekaboo', 'ClawHub 社区最受欢迎的网页内容提取技能', '由 ClawHub 社区开发的网页内容提取和分析工具。', '2.1.0', 'ClawHub/peekaboo', 'external', '["web","data"]', 0, 50, 'published', 'registry', 'clawhub', 'peekaboo', 'https://clawhub.ai/steipete/peekaboo');

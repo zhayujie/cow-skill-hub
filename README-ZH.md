@@ -93,6 +93,11 @@ Skills 本质上是一组 Markdown 格式的提示词文件（`SKILL.md`） 及�
 
 > 在技能详情页点击「文件」标签可以查看完整文件内容。
 
+OpenClaw 插件请使用插件自己的安装命令。例如：
+
+```bash
+openclaw plugins install @xquik/tweetclaw
+```
 
 ## 本地开发
 
