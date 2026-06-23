@@ -70,39 +70,23 @@ function readBool(
  * single build can serve different brands depending on runtime environment.
  */
 export function getSiteConfig(locals?: APIContext['locals']): SiteConfig {
-  // When DEPLOY_TARGET=node (self-hosted), default brand links/login OFF so a
-  // private instance is neutral out of the box; still overridable per-var.
-  const isNode = (readEnv(locals, 'DEPLOY_TARGET') || '').toLowerCase() === 'node';
-
-  const brandName = readEnv(locals, 'SITE_BRAND_NAME') || 'CowAgent Skill Hub';
-  const shortName = readEnv(locals, 'SITE_SHORT_NAME') || 'Skill Hub';
-  const cliName = readEnv(locals, 'SITE_CLI_NAME') || 'cow';
-  // Agent product name in body copy. Public default keeps "CowAgent"; private
-  // deployments fall back to the (neutral) short name unless overridden.
-  const agentName =
-    readEnv(locals, 'SITE_AGENT_NAME') || (isNode ? shortName : 'CowAgent');
-
+  // Defaults reproduce the public CowAgent branding. Private/self-hosted
+  // deployments opt out explicitly by setting SITE_* env vars (see ref/Dockerfile),
+  // so there is no implicit behavior tied to DEPLOY_TARGET.
   return {
-    brandName,
-    shortName,
-    agentName,
+    brandName: readEnv(locals, 'SITE_BRAND_NAME') || 'CowAgent Skill Hub',
+    shortName: readEnv(locals, 'SITE_SHORT_NAME') || 'Skill Hub',
+    agentName: readEnv(locals, 'SITE_AGENT_NAME') || 'CowAgent',
     description:
-      readEnv(locals, 'SITE_DESCRIPTION') ||
-      (isNode
-        ? 'Browse, search, and install skills'
-        : 'Browse, search, and install skills for CowAgent'),
+      readEnv(locals, 'SITE_DESCRIPTION') || 'Browse, search, and install skills for CowAgent',
     logoUrl: readEnv(locals, 'SITE_LOGO_URL') ?? '/logo/cow-logo.png',
-    cliName,
-    defaultAuthor: readEnv(locals, 'SITE_DEFAULT_AUTHOR') || (isNode ? 'Community' : 'CowAgent'),
-    copyrightOwner: readEnv(locals, 'SITE_COPYRIGHT_OWNER') ?? (isNode ? '' : 'CowAgent'),
-    brandUrl: readEnv(locals, 'SITE_BRAND_URL') ?? (isNode ? '' : 'https://cowagent.ai'),
-    docsUrl:
-      readEnv(locals, 'SITE_DOCS_URL') ?? (isNode ? '' : 'https://docs.cowagent.ai/skills/hub'),
-    githubUrl:
-      readEnv(locals, 'SITE_GITHUB_URL') ??
-      (isNode ? '' : 'https://github.com/zhayujie/cow-skill-hub'),
-    // Brand links / login default ON for public (Cloudflare), OFF for self-hosted.
-    showBrandLinks: readBool(locals, 'SITE_SHOW_BRAND_LINKS', !isNode),
-    showLogin: readBool(locals, 'SITE_SHOW_LOGIN', !isNode),
+    cliName: readEnv(locals, 'SITE_CLI_NAME') || 'cow',
+    defaultAuthor: readEnv(locals, 'SITE_DEFAULT_AUTHOR') || 'CowAgent',
+    copyrightOwner: readEnv(locals, 'SITE_COPYRIGHT_OWNER') ?? 'CowAgent',
+    brandUrl: readEnv(locals, 'SITE_BRAND_URL') ?? 'https://cowagent.ai',
+    docsUrl: readEnv(locals, 'SITE_DOCS_URL') ?? 'https://docs.cowagent.ai/skills/hub',
+    githubUrl: readEnv(locals, 'SITE_GITHUB_URL') ?? 'https://github.com/zhayujie/cow-skill-hub',
+    showBrandLinks: readBool(locals, 'SITE_SHOW_BRAND_LINKS', true),
+    showLogin: readBool(locals, 'SITE_SHOW_LOGIN', true),
   };
 }
