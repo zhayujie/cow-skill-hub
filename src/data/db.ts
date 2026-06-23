@@ -7,6 +7,14 @@ function safeParse(s: unknown, fallback: unknown) {
   try { return JSON.parse(s); } catch { return fallback; }
 }
 
+// Fallback author when a skill row has none. Overridable via SITE_DEFAULT_AUTHOR
+// for neutral-branded private deployments; defaults to CowAgent on the public site.
+function defaultAuthor(): string {
+  const fromEnv =
+    typeof process !== 'undefined' && process.env ? process.env.SITE_DEFAULT_AUTHOR : undefined;
+  return fromEnv && fromEnv.trim() ? fromEnv.trim() : 'CowAgent';
+}
+
 function rowToSkill(row: Record<string, unknown>): SkillData {
   return {
     name: row.name as string,
@@ -14,7 +22,7 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
     description: row.description as string || '',
     summary: row.summary as string || '',
     version: row.version as string || '1.0.0',
-    author: row.author as string || 'CowAgent',
+    author: row.author as string || defaultAuthor(),
     category: row.category as SkillData['category'],
     tags: safeParse(row.tags, []),
     featured: !!(row.featured as number),

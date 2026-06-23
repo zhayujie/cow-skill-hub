@@ -1,8 +1,10 @@
 ---
 import Base from '@/layouts/Base.astro';
 import { getAppContext } from '@/server/context';
+import { getSiteConfig } from '@/config/site';
 
-const user = Astro.locals.user ?? null;
+const site = getSiteConfig(Astro.locals);
+const user = site.showLogin ? (Astro.locals.user ?? null) : null;
 const { allowAnonymousSubmit } = await getAppContext(Astro.locals);
 // In anonymous mode anyone can submit without logging in.
 const canSubmit = !!user || allowAnonymousSubmit;
@@ -19,7 +21,7 @@ const errMsg =
           : '';
 ---
 
-<Base title="提交技能" description="提交技能到 CowAgent 技能社区">
+<Base title="提交技能" description={`提交技能到 ${site.agentName} 技能社区`}>
   <section class="pt-12 pb-20 px-6">
     <div class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-bold text-white mb-2">提交技能到社区</h1>

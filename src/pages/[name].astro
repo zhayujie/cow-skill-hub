@@ -4,7 +4,10 @@ import { tagOptions } from '@/data/skills';
 import type { SkillData } from '@/data/skills';
 import { getSkillByName, getTagDefinitions } from '@/data/db';
 import { getAppContext } from '@/server/context';
+import { getSiteConfig } from '@/config/site';
 import { marked } from 'marked';
+
+const site = getSiteConfig(Astro.locals);
 
 // Strip raw HTML from markdown to prevent stored XSS
 marked.use({ renderer: { html: () => '' } });
@@ -46,9 +49,10 @@ const sourceHomepage = skill.homepage
   || (isGithub && skill.sourceUrl ? skill.sourceUrl : '');
 
 function getInstallCommand(skill: SkillData): string {
-  if (skill.sourceProvider === 'clawhub') return `cow skill install clawhub:${skill.name}`;
-  if (skill.sourceProvider === 'github') return `cow skill install github:${skill.name}`;
-  return `cow skill install ${skill.name}`;
+  const cli = site.cliName;
+  if (skill.sourceProvider === 'clawhub') return `${cli} skill install clawhub:${skill.name}`;
+  if (skill.sourceProvider === 'github') return `${cli} skill install github:${skill.name}`;
+  return `${cli} skill install ${skill.name}`;
 }
 
 const installCmd = getInstallCommand(skill);
@@ -130,7 +134,7 @@ function formatFileSize(bytes: number): string {
                 </svg>
               </button>
               <div class="absolute bottom-full right-0 mb-2 w-48 text-center text-xs text-gray-300 bg-gray-800 border border-border rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg">
-                终端输入或发送给 CowAgent 一键安装
+                终端输入或发送给 {site.agentName} 一键安装
               </div>
             </div>
           </div>
@@ -245,7 +249,7 @@ function formatFileSize(bytes: number): string {
         <div class="bg-surface-card border border-border rounded-xl p-10 text-center">
           <p class="text-gray-500 mb-4">
             {isExternal
-              ? '此技能由第三方平台提供，CowAgent 可通过 CLI 直接安装使用。'
+              ? `此技能由第三方平台提供，${site.agentName} 可通过 CLI 直接安装使用。`
               : '暂无技能详情内容。'}
           </p>
           {sourceHomepage && (
