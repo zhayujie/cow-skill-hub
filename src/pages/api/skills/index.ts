@@ -6,7 +6,7 @@ function escapeLike(s: string): string {
 }
 
 export const GET: APIRoute = async ({ locals, url }) => {
-  const db = getDB(locals);
+  const db = await getDB(locals);
   if (!db) return json({ error: 'DB not available' }, 500);
 
   const category = url.searchParams.get('category') || 'all';

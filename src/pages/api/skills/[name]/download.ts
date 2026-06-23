@@ -16,8 +16,8 @@ function resolveRegistryDownloadUrl(provider: string, slug: string | null): stri
 }
 
 export const POST: APIRoute = async ({ params, request, locals }) => {
-  const db = getDB(locals);
-  const bucket = getBucket(locals);
+  const db = await getDB(locals);
+  const bucket = await getBucket(locals);
   if (!db) return json({ error: 'DB not available' }, 500);
 
   const { name } = params;

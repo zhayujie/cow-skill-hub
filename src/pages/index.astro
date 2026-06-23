@@ -3,9 +3,9 @@ import Base from '@/layouts/Base.astro';
 import SkillCard from '@/components/SkillCard.astro';
 import { categories, tagOptions } from '@/data/skills';
 import { getAllSkills, getTagDefinitions } from '@/data/db';
+import { getAppContext } from '@/server/context';
 
-const runtime = Astro.locals?.runtime;
-const db = runtime?.env?.DB || null;
+const db = (await getAppContext(Astro.locals)).db;
 
 const allSkills = await getAllSkills(db);
 const dbTags = await getTagDefinitions(db);

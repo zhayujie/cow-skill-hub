@@ -1,15 +1,6 @@
 import type { SkillData, SkillFile } from './skills';
 import { skills as mockSkills } from './skills';
-
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-}
-
-interface D1PreparedStatement {
-  bind(...values: unknown[]): D1PreparedStatement;
-  all(): Promise<{ results: Record<string, unknown>[] }>;
-  first(): Promise<Record<string, unknown> | null>;
-}
+import type { DataStore } from '@/server/storage/types';
 
 function safeParse(s: unknown, fallback: unknown) {
   if (typeof s !== 'string') return fallback;
@@ -40,7 +31,7 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
   };
 }
 
-export async function getAllSkills(db: D1Database | null): Promise<SkillData[]> {
+export async function getAllSkills(db: DataStore | null): Promise<SkillData[]> {
   if (!db) return mockSkills;
   try {
     const { results } = await db.prepare(
@@ -52,7 +43,7 @@ export async function getAllSkills(db: D1Database | null): Promise<SkillData[]> 
   }
 }
 
-export async function getSkillByName(db: D1Database | null, name: string): Promise<SkillData | null> {
+export async function getSkillByName(db: DataStore | null, name: string): Promise<SkillData | null> {
   if (!db) {
     return mockSkills.find(s => s.name === name) || null;
   }
@@ -78,7 +69,7 @@ export async function getSkillByName(db: D1Database | null, name: string): Promi
   }
 }
 
-export async function getTagDefinitions(db: D1Database | null): Promise<{ id: string; name: string }[]> {
+export async function getTagDefinitions(db: DataStore | null): Promise<{ id: string; name: string }[]> {
   if (!db) return [];
   try {
     const { results } = await db.prepare(
