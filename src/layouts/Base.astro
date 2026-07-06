@@ -41,7 +41,7 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
           <a href={site.docsUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">文档</a>
         )}
         {site.showBrandLinks && site.brandUrl && (
-          <a href={site.brandUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors hidden sm:inline whitespace-nowrap">{site.brandName}</a>
+          <a href={site.brandUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors hidden sm:inline whitespace-nowrap">{site.agentName}</a>
         )}
         {site.githubUrl && (
           <a
@@ -138,7 +138,7 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
       {(site.showBrandLinks || site.githubUrl) && (
         <div class="flex gap-6">
           {site.showBrandLinks && site.brandUrl && (
-            <a href={site.brandUrl} target="_blank" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">{site.brandName}</a>
+            <a href={site.brandUrl} target="_blank" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">{site.agentName}</a>
           )}
           {site.showBrandLinks && site.docsUrl && (
             <a href={site.docsUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">文档</a>
