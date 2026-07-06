@@ -12,13 +12,13 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^11.0.0",
     "@astrojs/node": "^8.3.0",
     "astro": "^4.16.0",
     "marked": "^17.0.5",
     "mysql2": "^3.11.0"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "^11.0.0",
     "@astrojs/tailwind": "^5.1.0",
     "@tailwindcss/typography": "^0.5.19",
     "fflate": "^0.8.2",
