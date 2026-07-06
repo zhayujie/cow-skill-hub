@@ -1,19 +1,18 @@
 import type { SkillData, SkillFile } from './skills';
 import { skills as mockSkills } from './skills';
-
-interface D1Database {
-  prepare(query: string): D1PreparedStatement;
-}
-
-interface D1PreparedStatement {
-  bind(...values: unknown[]): D1PreparedStatement;
-  all(): Promise<{ results: Record<string, unknown>[] }>;
-  first(): Promise<Record<string, unknown> | null>;
-}
+import type { DataStore } from '@/server/storage/types';
 
 function safeParse(s: unknown, fallback: unknown) {
   if (typeof s !== 'string') return fallback;
   try { return JSON.parse(s); } catch { return fallback; }
+}
+
+// Fallback author when a skill row has none. Overridable via SITE_DEFAULT_AUTHOR
+// for neutral-branded private deployments; defaults to CowAgent on the public site.
+function defaultAuthor(): string {
+  const fromEnv =
+    typeof process !== 'undefined' && process.env ? process.env.SITE_DEFAULT_AUTHOR : undefined;
+  return fromEnv && fromEnv.trim() ? fromEnv.trim() : 'CowAgent';
 }
 
 function rowToSkill(row: Record<string, unknown>): SkillData {
@@ -23,7 +22,7 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
     description: row.description as string || '',
     summary: row.summary as string || '',
     version: row.version as string || '1.0.0',
-    author: row.author as string || 'CowAgent',
+    author: row.author as string || defaultAuthor(),
     category: row.category as SkillData['category'],
     tags: safeParse(row.tags, []),
     featured: !!(row.featured as number),
@@ -40,7 +39,7 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
   };
 }
 
-export async function getAllSkills(db: D1Database | null): Promise<SkillData[]> {
+export async function getAllSkills(db: DataStore | null): Promise<SkillData[]> {
   if (!db) return mockSkills;
   try {
     const { results } = await db.prepare(
@@ -52,7 +51,7 @@ export async function getAllSkills(db: D1Database | null): Promise<SkillData[]> 
   }
 }
 
-export async function getSkillByName(db: D1Database | null, name: string): Promise<SkillData | null> {
+export async function getSkillByName(db: DataStore | null, name: string): Promise<SkillData | null> {
   if (!db) {
     return mockSkills.find(s => s.name === name) || null;
   }
@@ -78,7 +77,7 @@ export async function getSkillByName(db: D1Database | null, name: string): Promi
   }
 }
 
-export async function getTagDefinitions(db: D1Database | null): Promise<{ id: string; name: string }[]> {
+export async function getTagDefinitions(db: DataStore | null): Promise<{ id: string; name: string }[]> {
   if (!db) return [];
   try {
     const { results } = await db.prepare(

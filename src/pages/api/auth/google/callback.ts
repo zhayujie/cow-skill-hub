@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getDB } from '../../_utils';
+import { getDB, getSecrets } from '../../_utils';
 import { signJwt } from '@/lib/jwt';
 import { upsertOAuthUser } from '@/lib/auth-db';
 import {
@@ -27,10 +27,11 @@ export const GET: APIRoute = async ({ request, redirect, cookies, locals }) => {
     return redirect('/submit?error=oauth_state', 302);
   }
 
-  const clientId = locals.runtime?.env?.GOOGLE_CLIENT_ID;
-  const clientSecret = locals.runtime?.env?.GOOGLE_CLIENT_SECRET;
-  const jwtSecret = locals.runtime?.env?.JWT_SECRET;
-  const db = getDB(locals);
+  const secrets = await getSecrets(locals);
+  const clientId = secrets.GOOGLE_CLIENT_ID;
+  const clientSecret = secrets.GOOGLE_CLIENT_SECRET;
+  const jwtSecret = secrets.JWT_SECRET;
+  const db = await getDB(locals);
 
   if (!clientId || !clientSecret || !jwtSecret) {
     return new Response('OAuth server misconfiguration', { status: 503 });
@@ -82,7 +83,7 @@ export const GET: APIRoute = async ({ request, redirect, cookies, locals }) => {
   const avatar = u.picture || '';
   const userId = `google:${u.sub}`;
 
-  await upsertOAuthUser(db as Parameters<typeof upsertOAuthUser>[0], {
+  await upsertOAuthUser(db, {
     id: userId,
     provider: 'google',
     username,

@@ -1,15 +1,11 @@
 /**
- * Persist OAuth user to D1 (users table with provider + composite uniqueness).
+ * Persist OAuth user (users table with provider + composite uniqueness).
  */
 
-interface D1Like {
-  prepare(query: string): {
-    bind(...values: unknown[]): { run(): Promise<unknown> };
-  };
-}
+import type { DataStore } from '@/server/storage/types';
 
 export async function upsertOAuthUser(
-  db: D1Like,
+  db: DataStore,
   row: {
     id: string;
     provider: 'github' | 'google';

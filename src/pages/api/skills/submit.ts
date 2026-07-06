@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getDB, getBucket, json, errorResponse } from '../_utils';
+import { getDB, getBucket, getAppContext, json, errorResponse } from '../_utils';
 import { buildZip } from '@/lib/build-zip';
 import { FALLBACK_CATALOG_SLUGS } from '@/data/fallback-catalog-slugs';
 import { isValidSubmitSlug } from '@/lib/slug';
@@ -12,13 +12,15 @@ interface SubmitFile {
 }
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  const ctx = await getAppContext(locals);
   const user = locals.user;
-  if (!user) {
+  // When anonymous submit is enabled (simple self-hosted mode), skip login.
+  if (!user && !ctx.allowAnonymousSubmit) {
     return json({ error: 'Unauthorized' }, 401);
   }
 
-  const db = getDB(locals);
-  const bucket = getBucket(locals);
+  const db = ctx.db;
+  const bucket = ctx.blob;
   if (!db || !bucket) {
     return json({ error: 'Service unavailable' }, 503);
   }
@@ -105,7 +107,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
 
   const tagsJson = JSON.stringify(tags);
-  const authorStr = user.name || user.username;
+  // Anonymous submissions have no linked user: publish immediately under a
+  // generic author and leave author_id NULL (no FK row to reference).
+  const anonymous = !user;
+  const authorStr = anonymous ? 'Anonymous' : user!.name || user!.username;
+  const authorId = anonymous ? null : user!.sub;
+  const initialStatus = anonymous ? 'published' : 'pending';
   const r2Key = `skills/${name}.zip`;
 
   const zipInner = normalizedFiles.map((f) => ({
@@ -128,7 +135,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         name, display_name, description, summary, version, author, author_id,
         category, tags, featured, sort_order, status, requires_env, requires_bins,
         platforms, homepage, source_type, source_provider, source_url, skill_md, r2_key
-      ) VALUES (?, ?, ?, ?, '1.0.0', ?, ?, 'community', ?, 0, 500, 'pending', '[]', '[]',
+      ) VALUES (?, ?, ?, ?, '1.0.0', ?, ?, 'community', ?, 0, 500, ?, '[]', '[]',
         '["darwin","linux","windows"]', NULL, 'zip', 'community', NULL, ?, ?)`,
     )
     .bind(
@@ -137,8 +144,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       description,
       summary,
       authorStr,
-      user.sub,
+      authorId,
       tagsJson,
+      initialStatus,
       skillMdContent,
       r2Key,
     );

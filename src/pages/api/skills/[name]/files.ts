@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { json, getDB, isValidSkillName, errorResponse } from '../../_utils';
 
 export const GET: APIRoute = async ({ params, locals }) => {
-  const db = getDB(locals);
+  const db = await getDB(locals);
   if (!db) return json({ error: 'DB not available' }, 500);
 
   const { name } = params;

@@ -1,10 +1,11 @@
 import { defineMiddleware } from 'astro:middleware';
 import { verifyJwt } from '@/lib/jwt';
+import { getSecrets } from '@/pages/api/_utils';
 
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.user = null;
 
-  const secret = context.locals.runtime?.env?.JWT_SECRET;
+  const secret = (await getSecrets(context.locals)).JWT_SECRET;
   const token = context.cookies.get('cow_token')?.value;
 
   if (typeof secret === 'string' && secret.length > 0 && token) {

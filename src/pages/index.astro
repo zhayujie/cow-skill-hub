@@ -3,9 +3,12 @@ import Base from '@/layouts/Base.astro';
 import SkillCard from '@/components/SkillCard.astro';
 import { categories, tagOptions } from '@/data/skills';
 import { getAllSkills, getTagDefinitions } from '@/data/db';
+import { getAppContext } from '@/server/context';
+import { getSiteConfig } from '@/config/site';
 
-const runtime = Astro.locals?.runtime;
-const db = runtime?.env?.DB || null;
+const site = getSiteConfig(Astro.locals);
+const installHint = `${site.cliName} skill install <name>`;
+const db = (await getAppContext(Astro.locals)).db;
 
 const allSkills = await getAllSkills(db);
 const dbTags = await getTagDefinitions(db);
@@ -19,7 +22,7 @@ for (const t of tags) { tagMap[t.id] = t.name; }
   <section class="pt-20 pb-12 px-6 text-center">
     <div class="max-w-content mx-auto">
       <div class="inline-block px-4 py-1.5 bg-primary/8 border border-primary/20 rounded-full text-xs text-primary mb-7 tracking-wide">
-        CowAgent Skill Hub
+        {site.brandName}
       </div>
       <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-6 bg-gradient-to-br from-white to-gray-300 bg-clip-text text-transparent">
         发现和安装技能
@@ -45,17 +48,18 @@ for (const t of tags) { tagMap[t.id] = t.name; }
       <!-- Install hint -->
       <div class="max-w-lg mx-auto bg-surface-card border border-border rounded-xl px-5 py-3 flex items-center justify-between">
         <code class="text-sm text-gray-400 font-mono">
-          <span class="text-primary">$</span> cow skill install &lt;name&gt;
+          <span class="text-primary">$</span> {installHint}
         </code>
         <div class="relative group flex items-center gap-2 shrink-0 ml-3">
           <button
             id="copyInstallBtn"
+            data-install={installHint}
             class="text-xs text-gray-500 hover:text-primary border border-border-light rounded-md px-3 py-1 transition-colors cursor-pointer"
           >
             复制
           </button>
           <div class="absolute bottom-full right-0 mb-2 w-48 text-center text-xs text-gray-300 bg-gray-800 border border-border rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg">
-            终端输入或发送给 CowAgent 一键安装
+            终端输入或发送给 {site.agentName} 一键安装
           </div>
         </div>
       </div>
@@ -237,7 +241,7 @@ for (const t of tags) { tagMap[t.id] = t.name; }
     });
 
     document.getElementById('copyInstallBtn').addEventListener('click', function() {
-      navigator.clipboard.writeText('cow skill install <name>');
+      navigator.clipboard.writeText(this.dataset.install || '');
       this.textContent = '已复制!';
       this.classList.add('text-primary', 'border-primary/30');
       setTimeout(() => {

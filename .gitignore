@@ -1,8 +1,36 @@
+# Dependencies & build output
 node_modules/
 dist/
 .astro/
+.output/
+.vercel/
+.netlify/
+
+# Cloudflare / wrangler local state
 .wrangler/
+
+# Secrets & environment files (NEVER commit real credentials)
 .dev.vars
+.dev.vars.*
 .env
-.DS_Store
+.env.*
+*.pem
+*.key
+
+# Local data & logs
+data/
+*.log
+logs/
+
+# Scripts (local-only helpers)
 scripts/
+
+# Local Docker deployment artifacts (compose, Dockerfile, scripts, self-hosting doc)
+ref/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,4 +1,8 @@
 import type { APIContext } from 'astro';
+import { getAppContext } from '@/server/context';
+import type { AppSecrets, BlobStore, DataStore } from '@/server/storage/types';
+
+export { getAppContext };
 
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,12 +17,16 @@ export function json(data: unknown, status = 200) {
   });
 }
 
-export function getDB(locals: APIContext['locals']) {
-  return (locals as any).runtime?.env?.DB ?? null;
+export async function getDB(locals: APIContext['locals']): Promise<DataStore | null> {
+  return (await getAppContext(locals)).db;
 }
 
-export function getBucket(locals: APIContext['locals']) {
-  return (locals as any).runtime?.env?.BUCKET ?? null;
+export async function getBucket(locals: APIContext['locals']): Promise<BlobStore | null> {
+  return (await getAppContext(locals)).blob;
+}
+
+export async function getSecrets(locals: APIContext['locals']): Promise<AppSecrets> {
+  return (await getAppContext(locals)).secrets;
 }
 
 export function parseSkillRow(row: Record<string, unknown>) {

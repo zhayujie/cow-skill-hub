@@ -1,8 +1,9 @@
 import type { APIRoute } from 'astro';
+import { getSecrets } from '../_utils';
 import { OAUTH_STATE_COOKIE, OAUTH_STATE_MAX_AGE, isSecureRequest } from '@/lib/oauth-cookie';
 
 export const GET: APIRoute = async ({ request, redirect, cookies, locals }) => {
-  const clientId = locals.runtime?.env?.GITHUB_CLIENT_ID;
+  const clientId = (await getSecrets(locals)).GITHUB_CLIENT_ID;
   if (!clientId) {
     return new Response('GitHub OAuth is not configured', { status: 503 });
   }

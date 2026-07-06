@@ -5,6 +5,7 @@ declare namespace App {
   interface Locals {
     runtime?: {
       env?: {
+        DEPLOY_TARGET?: string;
         DB?: unknown;
         BUCKET?: unknown;
         JWT_SECRET?: string;

@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { getSecrets } from '../_utils';
 import { verifyJwt } from '@/lib/jwt';
 import { AUTH_TOKEN_COOKIE } from '@/lib/oauth-cookie';
 
@@ -31,7 +32,7 @@ function safeAvatarUrl(raw: string): URL | null {
 }
 
 export const GET: APIRoute = async ({ cookies, locals }) => {
-  const secret = locals.runtime?.env?.JWT_SECRET;
+  const secret = (await getSecrets(locals)).JWT_SECRET;
   if (typeof secret !== 'string' || secret.length === 0) {
     return new Response(null, { status: 503 });
   }
