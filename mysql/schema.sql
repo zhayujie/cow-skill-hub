@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS skills (
   source_path      TEXT,
   r2_key           VARCHAR(512) NULL,                              -- object storage key
   sha256           VARCHAR(128) NULL,
+  display_name_en  VARCHAR(255) NULL,                              -- optional English display name
+  description_en   TEXT NULL,                                      -- optional English description
   created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT chk_skills_category CHECK (category IN ('community', 'external')),

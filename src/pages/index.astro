@@ -1,23 +1,62 @@
 ---
 import Base from '@/layouts/Base.astro';
 import SkillCard from '@/components/SkillCard.astro';
-import { categories, tagOptions } from '@/data/skills';
+import { categories, tagOptions, localizeSkill } from '@/data/skills';
 import { getAllSkills, getTagDefinitions } from '@/data/db';
 import { getAppContext } from '@/server/context';
 import { getSiteConfig } from '@/config/site';
+import { DEFAULT_LANG, HREFLANG, localizePath, t, tagLabel } from '@/i18n';
 
 const site = getSiteConfig(Astro.locals);
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const m = t(lang);
 const installHint = `${site.cliName} skill install <name>`;
 const db = (await getAppContext(Astro.locals)).db;
 
 const allSkills = await getAllSkills(db);
 const dbTags = await getTagDefinitions(db);
-const tags = dbTags.length > 0 ? dbTags : tagOptions;
+const tags = (dbTags.length > 0 ? dbTags : tagOptions).map((tag) => ({
+  id: tag.id,
+  name: tagLabel(tag.id, tag.name, lang),
+}));
 const tagMap: Record<string, string> = {};
-for (const t of tags) { tagMap[t.id] = t.name; }
+for (const tag of tags) { tagMap[tag.id] = tag.name; }
+
+const origin = site.siteUrl || Astro.url.origin;
+const homeUrl = `${origin}${localizePath('/', lang)}`;
+const pageTitle = `${site.brandName} - ${m.homeTitleSuffix}`;
+const pageDescription = site.description || m.defaultDescription(site.agentName);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: site.brandName,
+      url: homeUrl,
+      inLanguage: HREFLANG[lang],
+      description: pageDescription,
+    },
+    {
+      '@type': 'CollectionPage',
+      name: pageTitle,
+      url: homeUrl,
+      inLanguage: HREFLANG[lang],
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: allSkills.length,
+        itemListElement: allSkills.map((skill, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: localizeSkill(skill, lang).displayName,
+          url: `${origin}${localizePath(`/${skill.name}`, lang)}`,
+        })),
+      },
+    },
+  ],
+};
 ---
 
-<Base title="Skill Hub">
+<Base title={site.shortName} fullTitle={pageTitle} description={pageDescription} jsonLd={jsonLd}>
   <!-- Hero -->
   <section class="pt-20 pb-12 px-6 text-center">
     <div class="max-w-content mx-auto">
@@ -25,10 +64,10 @@ for (const t of tags) { tagMap[t.id] = t.name; }
         {site.brandName}
       </div>
       <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight mb-6 bg-gradient-to-br from-white to-gray-300 bg-clip-text text-transparent">
-        发现和安装技能
+        {m.heroTitle}
       </h1>
       <p class="max-w-xl mx-auto text-base text-gray-300 leading-relaxed mb-10">
-        浏览官方推荐和社区贡献的 Skills，一行命令即可为你的 Agent 扩展新能力
+        {m.heroSubtitle}
       </p>
 
       <!-- Search -->
@@ -40,7 +79,7 @@ for (const t of tags) { tagMap[t.id] = t.name; }
         <input
           id="searchInput"
           type="text"
-          placeholder="搜索技能名称、描述或标签..."
+          placeholder={m.searchPlaceholder}
           class="w-full pl-11 pr-4 py-3 bg-surface-card border border-border rounded-xl text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors"
         />
       </div>
@@ -56,10 +95,10 @@ for (const t of tags) { tagMap[t.id] = t.name; }
             data-install={installHint}
             class="text-xs text-gray-500 hover:text-primary border border-border-light rounded-md px-3 py-1 transition-colors cursor-pointer"
           >
-            复制
+            {m.copy}
           </button>
           <div class="absolute bottom-full right-0 mb-2 w-48 text-center text-xs text-gray-300 bg-gray-800 border border-border rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-lg">
-            终端输入或发送给 {site.agentName} 一键安装
+            {m.installTooltip(site.agentName)}
           </div>
         </div>
       </div>
@@ -81,13 +120,13 @@ for (const t of tags) { tagMap[t.id] = t.name; }
                 : 'bg-surface-card text-gray-400 border-border hover:border-border-light hover:text-gray-300'
             ]}
           >
-            {cat.name}
+            {lang === 'en' ? cat.nameEn : cat.name}
           </button>
         ))}
       </div>
       <!-- Tag row -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1">
-        <span class="text-xs text-gray-600 shrink-0">标签</span>
+        <span class="text-xs text-gray-600 shrink-0">{m.tagsLabel}</span>
         {tags.map(tag => (
           <button
             data-tag={tag.id}
@@ -105,8 +144,8 @@ for (const t of tags) { tagMap[t.id] = t.name; }
     <div class="max-w-content mx-auto">
       <div id="skillsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {allSkills.map((skill, i) => (
-          <div class="h-full" data-skill-name={skill.name} data-skill-category={skill.category} data-skill-featured={skill.featured ? '1' : '0'} data-skill-tags={skill.tags.join(',')} data-skill-provider={skill.sourceProvider} style={i >= 30 ? 'display:none' : ''}>
-            <SkillCard skill={skill} tagMap={tagMap} />
+          <div class="h-full" data-skill-name={skill.name} data-skill-alt={lang === DEFAULT_LANG ? '' : `${skill.displayName} ${skill.description}`} data-skill-category={skill.category} data-skill-featured={skill.featured ? '1' : '0'} data-skill-tags={skill.tags.join(',')} data-skill-provider={skill.sourceProvider} style={i >= 30 ? 'display:none' : ''}>
+            <SkillCard skill={localizeSkill(skill, lang)} tagMap={tagMap} />
           </div>
         ))}
       </div>
@@ -114,9 +153,9 @@ for (const t of tags) { tagMap[t.id] = t.name; }
       <!-- Load more -->
       <div id="loadMoreWrap" class:list={['text-center pt-8', allSkills.length <= 30 && 'hidden']}>
         <button id="loadMoreBtn" class="px-8 py-2.5 rounded-full text-sm font-medium border border-border text-gray-400 bg-surface-card hover:border-border-light hover:text-gray-300 transition-all duration-200 cursor-pointer">
-          加载更多
+          {m.loadMore}
         </button>
-        <p id="skillCount" class="text-xs text-gray-600 mt-3">已显示 30 / {allSkills.length} 个技能</p>
+        <p id="skillCount" class="text-xs text-gray-600 mt-3">{m.skillCount(30, allSkills.length)}</p>
       </div>
 
       <div id="emptyState" class="hidden text-center py-20">
@@ -124,12 +163,12 @@ for (const t of tags) { tagMap[t.id] = t.name; }
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <p class="text-gray-500">未找到匹配的技能</p>
+        <p class="text-gray-500">{m.noMatch}</p>
       </div>
     </div>
   </section>
 
-  <script is:inline>
+  <script is:inline define:vars={{ i18n: { countTpl: m.skillCount('{shown}', '{total}'), copy: m.copy, copied: m.copied } }}>
     const PAGE_SIZE = 30;
 
     const searchInput = document.getElementById('searchInput');
@@ -162,7 +201,7 @@ for (const t of tags) { tagMap[t.id] = t.name; }
         const cat = card.dataset.skillCategory;
         const featured = card.dataset.skillFeatured === '1';
         const tags = card.dataset.skillTags.toLowerCase().split(',').filter(Boolean);
-        const text = card.textContent.toLowerCase();
+        const text = (card.textContent + ' ' + (card.dataset.skillAlt || '')).toLowerCase();
 
         const matchCategory = currentCategory === 'all'
           || (currentCategory === 'featured' ? featured : cat === currentCategory);
@@ -186,7 +225,7 @@ for (const t of tags) { tagMap[t.id] = t.name; }
       const hasMore = showCount < matched.length;
       loadMoreWrap.classList.toggle('hidden', !hasMore);
       if (hasMore) {
-        skillCount.textContent = '已显示 ' + showCount + ' / ' + matched.length + ' 个技能';
+        skillCount.textContent = i18n.countTpl.replace('{shown}', showCount).replace('{total}', matched.length);
       }
 
       emptyState.classList.toggle('hidden', matched.length > 0);
@@ -242,10 +281,10 @@ for (const t of tags) { tagMap[t.id] = t.name; }
 
     document.getElementById('copyInstallBtn').addEventListener('click', function() {
       navigator.clipboard.writeText(this.dataset.install || '');
-      this.textContent = '已复制!';
+      this.textContent = i18n.copied;
       this.classList.add('text-primary', 'border-primary/30');
       setTimeout(() => {
-        this.textContent = '复制';
+        this.textContent = i18n.copy;
         this.classList.remove('text-primary', 'border-primary/30');
       }, 2000);
     });

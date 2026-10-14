@@ -2,8 +2,11 @@
 import Base from '@/layouts/Base.astro';
 import { getAppContext } from '@/server/context';
 import { getSiteConfig } from '@/config/site';
+import { DEFAULT_LANG, t } from '@/i18n';
 
 const site = getSiteConfig(Astro.locals);
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const m = t(lang);
 const user = site.showLogin ? (Astro.locals.user ?? null) : null;
 const { allowAnonymousSubmit } = await getAppContext(Astro.locals);
 // In anonymous mode anyone can submit without logging in.
@@ -11,22 +14,22 @@ const canSubmit = !!user || allowAnonymousSubmit;
 const err = Astro.url.searchParams.get('error');
 const errMsg =
   err === 'oauth_state'
-    ? '登录验证失败，请重试'
+    ? m.errOauthState
     : err === 'oauth_token'
-      ? '无法完成授权，请重试'
+      ? m.errOauthToken
       : err === 'oauth_user'
-        ? '无法读取账号信息'
+        ? m.errOauthUser
         : err
-          ? '登录出错'
+          ? m.errLogin
           : '';
 ---
 
-<Base title="提交技能" description={`提交技能到 ${site.agentName} 技能社区`}>
+<Base title={m.submitTitle} description={m.submitDescription(site.agentName)}>
   <section class="pt-12 pb-20 px-6">
     <div class="max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold text-white mb-2">提交技能到社区</h1>
+      <h1 class="text-3xl font-bold text-white mb-2">{m.submitHeading}</h1>
       <p class="text-gray-400 text-sm mb-8">
-        上传包含 <code class="text-primary">SKILL.md</code> 的文件夹或 zip，安全检查及审核通过后会公开发布。
+        {m.submitIntroBefore} <code class="text-primary">SKILL.md</code>{lang === 'zh' ? ' ' : ''}{m.submitIntroAfter}
       </p>
 
       {errMsg && (
@@ -37,19 +40,19 @@ const errMsg =
 
       {!canSubmit ? (
         <div class="rounded-2xl border border-border bg-surface-card p-8 text-center space-y-4">
-          <p class="text-gray-300">请先登录后再提交技能</p>
+          <p class="text-gray-300">{m.loginRequired}</p>
           <div class="flex flex-wrap justify-center gap-3">
             <a
               href="/api/auth/github"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 text-sm font-medium hover:bg-gray-100 transition-colors"
             >
-              使用 GitHub 登录
+              {m.loginGithub}
             </a>
             <a
               href="/api/auth/google"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-gray-200 text-sm font-medium hover:bg-surface-card-hover transition-colors"
             >
-              使用 Google 登录
+              {m.loginGoogle}
             </a>
           </div>
         </div>
@@ -57,22 +60,22 @@ const errMsg =
         <>
           {user && (
             <div class="rounded-2xl border border-border bg-surface-card p-6 mb-6">
-              <p class="text-xs text-gray-500 mb-1">当前作者</p>
+              <p class="text-xs text-gray-500 mb-1">{m.currentAuthor}</p>
               <p class="text-sm text-gray-200">{user.name || user.username}</p>
             </div>
           )}
 
           <div class="relative rounded-2xl border-2 border-dashed border-border hover:border-primary/40 transition-colors mb-6">
             <div id="dropZone" class="p-10 text-center cursor-pointer">
-              <p class="text-gray-300 text-sm mb-1">拖拽 zip 或文件夹到此处，或点击下方选择</p>
-              <p class="text-gray-600 text-xs mb-2">最大 5 MB</p>
+              <p class="text-gray-300 text-sm mb-1">{m.dropHint}</p>
+              <p class="text-gray-600 text-xs mb-2">{m.maxSize}</p>
               <div class="flex flex-wrap justify-center gap-3">
                 <label class="px-4 py-2 rounded-lg bg-primary/15 text-primary text-sm border border-primary/25 cursor-pointer hover:bg-primary/25 transition-colors">
-                  选择 zip
+                  {m.chooseZip}
                   <input id="zipInput" type="file" accept=".zip,application/zip" class="hidden" />
                 </label>
                 <label class="px-4 py-2 rounded-lg border border-border text-gray-300 text-sm cursor-pointer hover:bg-surface-secondary transition-colors">
-                  选择文件夹
+                  {m.chooseFolder}
                   <input id="dirInput" type="file" class="hidden" multiple webkitdirectory="" />
                 </label>
               </div>
@@ -82,7 +85,7 @@ const errMsg =
               class="hidden absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-2xl bg-surface/92 backdrop-blur-sm border-2 border-dashed border-primary/30"
             >
               <span class="inline-block h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" aria-hidden="true"></span>
-              <p class="text-sm text-gray-300">正在解析文件…</p>
+              <p class="text-sm text-gray-300">{m.parsing}</p>
             </div>
           </div>
 
@@ -90,7 +93,7 @@ const errMsg =
 
           <form id="skillForm" class="hidden space-y-5 rounded-2xl border border-border bg-surface-card p-6 scroll-mt-28">
             <div>
-              <label class="block text-xs text-gray-500 mb-1">唯一标识</label>
+              <label class="block text-xs text-gray-500 mb-1">{m.fieldSlug}</label>
               <input
                 id="fSlug"
                 type="text"
@@ -101,7 +104,7 @@ const errMsg =
               <p id="fSlugHint" class="text-xs mt-1 text-gray-500"></p>
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">显示名称</label>
+              <label class="block text-xs text-gray-500 mb-1">{m.fieldDisplayName}</label>
               <input
                 id="fDisplay"
                 type="text"
@@ -110,7 +113,7 @@ const errMsg =
               />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">简短描述</label>
+              <label class="block text-xs text-gray-500 mb-1">{m.fieldDescription}</label>
               <textarea
                 id="fDesc"
                 required
@@ -119,11 +122,11 @@ const errMsg =
               ></textarea>
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-2">标签（可选）</label>
+              <label class="block text-xs text-gray-500 mb-2">{m.fieldTags}</label>
               <div id="tagsWrap" class="flex flex-wrap gap-2"></div>
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">将包含的文件</label>
+              <label class="block text-xs text-gray-500 mb-1">{m.fieldFiles}</label>
               <ul id="fileList" class="text-xs text-gray-500 font-mono max-h-40 overflow-y-auto border border-border rounded-lg p-3"></ul>
             </div>
             <button
@@ -131,7 +134,7 @@ const errMsg =
               id="submitBtn"
               class="w-full py-3 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-light transition-colors disabled:opacity-50"
             >
-              提交技能
+              {m.submitButton}
             </button>
             <p id="submitMsg" class="text-sm text-center hidden"></p>
           </form>
@@ -149,16 +152,16 @@ const errMsg =
               <div class="mb-4 flex justify-center">
                 <span class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary text-3xl" aria-hidden="true">✓</span>
               </div>
-              <h2 id="successModalTitle" class="text-lg font-bold text-white mb-2">感谢你的贡献！</h2>
+              <h2 id="successModalTitle" class="text-lg font-bold text-white mb-2">{m.successTitle}</h2>
               <p class="text-sm text-gray-400 leading-relaxed mb-6">
-                技能已提交成功。我们会对其进行安全检测和审核，通过后将在技能广场中公开展示。
+                {m.successText}
               </p>
               <button
                 id="successModalClose"
                 type="button"
                 class="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-light transition-colors"
               >
-                好的
+                {m.ok}
               </button>
             </div>
           </div>

@@ -15,6 +15,7 @@
  *   SITE_SHOW_BRAND_LINKS=false
  *   SITE_GITHUB_URL=""        # empty hides the GitHub source link
  *   SITE_DOCS_URL=""          # empty hides the docs link
+ *   SITE_URL="https://hub.example.com"  # public origin behind a reverse proxy
  */
 import type { APIContext } from 'astro';
 
@@ -25,8 +26,10 @@ export interface SiteConfig {
   shortName: string;
   /** Agent product name used in body copy ("发送给 X 一键安装"), e.g. "CowAgent". */
   agentName: string;
-  /** Default meta description. */
+  /** Meta description override; empty uses the built-in localized default. */
   description: string;
+  /** Public origin used for canonical/sitemap URLs; empty uses the request origin. */
+  siteUrl: string;
   /** Logo path under /public; empty hides the logo image. */
   logoUrl: string;
   /** CLI binary name used in install commands, e.g. "cow" -> "cow skill install". */
@@ -77,8 +80,8 @@ export function getSiteConfig(locals?: APIContext['locals']): SiteConfig {
     brandName: readEnv(locals, 'SITE_BRAND_NAME') || 'CowAgent Skill Hub',
     shortName: readEnv(locals, 'SITE_SHORT_NAME') || 'Skill Hub',
     agentName: readEnv(locals, 'SITE_AGENT_NAME') || 'CowAgent',
-    description:
-      readEnv(locals, 'SITE_DESCRIPTION') || 'Browse, search, and install skills for CowAgent',
+    description: readEnv(locals, 'SITE_DESCRIPTION') || '',
+    siteUrl: (readEnv(locals, 'SITE_URL') || '').replace(/\/+$/, ''),
     logoUrl: readEnv(locals, 'SITE_LOGO_URL') ?? '/logo/cow-logo.png',
     cliName: readEnv(locals, 'SITE_CLI_NAME') || 'cow',
     defaultAuthor: readEnv(locals, 'SITE_DEFAULT_AUTHOR') || 'CowAgent',

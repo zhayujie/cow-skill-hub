@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS skills (
   source_path      TEXT,                           -- subdirectory within source (for multi-skill repos)
   r2_key           TEXT,                           -- R2 object key, e.g. "skills/web-search/1.0.0.zip"
   sha256           TEXT,                           -- SHA-256 checksum of the zip package
+  display_name_en  TEXT NOT NULL DEFAULT '',        -- optional English display name (empty = use display_name)
+  description_en   TEXT NOT NULL DEFAULT '',        -- optional English description (empty = use description)
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at       TEXT NOT NULL DEFAULT (datetime('now'))
 );

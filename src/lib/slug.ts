@@ -1,8 +1,15 @@
 /** Slug for community submit: 2–64 chars, lowercase alphanumeric with single hyphens between segments. */
 export const SUBMIT_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/;
 
+/** Slugs that would shadow site routes or language prefixes. */
+export const RESERVED_SLUGS: ReadonlySet<string> = new Set(['en', 'zh', 'api', 'submit', '404']);
+
 export function isValidSubmitSlug(s: string): boolean {
   return typeof s === 'string' && s.length >= 2 && s.length <= 64 && SUBMIT_SLUG_RE.test(s);
+}
+
+export function isReservedSlug(s: string): boolean {
+  return RESERVED_SLUGS.has(s);
 }
 
 export function normalizeSlugInput(raw: string): string {

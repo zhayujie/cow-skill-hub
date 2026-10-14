@@ -15,11 +15,20 @@ function defaultAuthor(): string {
   return fromEnv && fromEnv.trim() ? fromEnv.trim() : 'CowAgent';
 }
 
+// D1 returns "YYYY-MM-DD HH:MM:SS" strings, MySQL returns Date objects.
+function toDate(v: unknown): string | undefined {
+  if (v instanceof Date && !isNaN(v.getTime())) return v.toISOString().slice(0, 10);
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+  return undefined;
+}
+
 function rowToSkill(row: Record<string, unknown>): SkillData {
   return {
     name: row.name as string,
     displayName: row.display_name as string,
     description: row.description as string || '',
+    displayNameEn: row.display_name_en as string || '',
+    descriptionEn: row.description_en as string || '',
     summary: row.summary as string || '',
     version: row.version as string || '1.0.0',
     author: row.author as string || defaultAuthor(),
@@ -35,6 +44,7 @@ function rowToSkill(row: Record<string, unknown>): SkillData {
     sourceProvider: row.source_provider as SkillData['sourceProvider'],
     sourceUrl: row.source_url as string | undefined,
     sourcePath: row.source_path as string | undefined,
+    updatedAt: toDate(row.updated_at),
     files: [],
   };
 }

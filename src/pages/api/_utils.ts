@@ -34,6 +34,8 @@ export function parseSkillRow(row: Record<string, unknown>) {
     name: row.name,
     display_name: row.display_name,
     description: row.description,
+    display_name_en: row.display_name_en || '',
+    description_en: row.description_en || '',
     summary: row.summary,
     version: row.version,
     author: row.author,

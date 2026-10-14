@@ -1,24 +1,69 @@
 ---
 import { getSiteConfig } from '@/config/site';
+import { DEFAULT_LANG, HREFLANG, LANG_COOKIE, OG_LOCALE, localizePath, normalizePath, t } from '@/i18n';
+import type { Lang } from '@/i18n';
 
 interface Props {
   title: string;
+  /** Use as the whole <title> instead of "<title> - <brand>". */
+  fullTitle?: string;
   description?: string;
+  /** Language-neutral path of this page; defaults to the current URL path. */
+  path?: string;
+  noindex?: boolean;
+  ogType?: string;
+  jsonLd?: unknown;
 }
 
 const site = getSiteConfig(Astro.locals);
-const { title, description = site.description } = Astro.props;
+const lang: Lang = Astro.locals.lang ?? DEFAULT_LANG;
+const m = t(lang);
+const otherLang: Lang = lang === 'zh' ? 'en' : 'zh';
+const {
+  title,
+  fullTitle,
+  description = site.description || m.defaultDescription(site.agentName),
+  noindex = false,
+  ogType = 'website',
+  jsonLd,
+} = Astro.props;
+const pageTitle = fullTitle || `${title} - ${site.brandName}`;
+const path = normalizePath(Astro.props.path ?? Astro.url.pathname);
+const origin = site.siteUrl || Astro.url.origin;
+const absUrl = (p: string) => (/^https?:\/\//.test(p) ? p : `${origin}${p}`);
+const canonicalUrl = absUrl(localizePath(path, lang));
+const homeHref = localizePath('/', lang);
 const user = site.showLogin ? (Astro.locals.user ?? null) : null;
+const jsonLdText = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
 ---
 
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang={HREFLANG[lang]}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title} - {site.brandName}</title>
+  <title>{pageTitle}</title>
   <meta name="description" content={description} />
+  {noindex ? (
+    <meta name="robots" content="noindex" />
+  ) : (
+    <>
+      <link rel="canonical" href={canonicalUrl} />
+      <link rel="alternate" hreflang={HREFLANG.zh} href={absUrl(localizePath(path, 'zh'))} />
+      <link rel="alternate" hreflang={HREFLANG.en} href={absUrl(localizePath(path, 'en'))} />
+      <link rel="alternate" hreflang="x-default" href={absUrl(localizePath(path, DEFAULT_LANG))} />
+    </>
+  )}
+  <meta property="og:type" content={ogType} />
+  <meta property="og:site_name" content={site.brandName} />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:locale" content={OG_LOCALE[lang]} />
+  {site.logoUrl && <meta property="og:image" content={absUrl(site.logoUrl)} />}
+  <meta name="twitter:card" content="summary" />
   {site.logoUrl && <link rel="icon" type="image/png" href={site.logoUrl} />}
+  {jsonLdText && <script type="application/ld+json" set:html={jsonLdText} />}
 </head>
 <style is:global>
   .scrollbar-thin::-webkit-scrollbar { height: 2px; }
@@ -31,14 +76,14 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
 <body class="bg-surface text-gray-200 font-sans antialiased">
   <nav class="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border">
     <div class="max-w-content mx-auto px-6 h-16 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-2.5 font-bold text-lg">
+      <a href={homeHref} class="flex items-center gap-2.5 font-bold text-lg">
         {site.logoUrl && <img src={site.logoUrl} alt={site.brandName} class="w-8 h-8 rounded-lg" />}
-        <span class="text-gray-200">{site.shortName}</span>
+        <span class="text-gray-200 whitespace-nowrap">{site.shortName}</span>
       </a>
-      <div class="flex items-center gap-4 sm:gap-6 md:gap-8">
-        <a href="/submit" class="text-sm text-primary hover:text-primary-light transition-colors whitespace-nowrap">提交技能</a>
+      <div class="flex items-center gap-3 sm:gap-6 md:gap-8">
+        <a href={localizePath('/submit', lang)} class="text-sm text-primary hover:text-primary-light transition-colors whitespace-nowrap">{m.navSubmit}</a>
         {site.showBrandLinks && site.docsUrl && (
-          <a href={site.docsUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">文档</a>
+          <a href={site.docsUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap">{m.navDocs}</a>
         )}
         {site.showBrandLinks && site.brandUrl && (
           <a href={site.brandUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-400 hover:text-gray-200 transition-colors hidden sm:inline whitespace-nowrap">{site.agentName}</a>
@@ -48,14 +93,25 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
             href={site.githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors shrink-0"
-            aria-label={`${site.brandName} 源码仓库`}
+            class="hidden sm:flex items-center justify-center text-gray-400 hover:text-gray-200 transition-colors shrink-0"
+            aria-label={m.repoLabel(site.brandName)}
           >
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
             </svg>
           </a>
         )}
+        <a
+          href={localizePath(path, otherLang)}
+          hreflang={HREFLANG[otherLang]}
+          data-lang={otherLang}
+          data-cookie={LANG_COOKIE}
+          id="langSwitch"
+          class="text-sm text-gray-400 hover:text-gray-200 transition-colors whitespace-nowrap"
+        >
+          <span class="sm:hidden">{m.langSwitchShort}</span>
+          <span class="hidden sm:inline">{m.langSwitchLabel}</span>
+        </a>
         {site.showLogin && (user ? (
           <div class="relative shrink-0" id="navUserWrap">
             <button
@@ -64,7 +120,7 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
               class="flex items-center rounded-full border border-border focus:outline-none focus:ring-2 focus:ring-primary/40"
               aria-expanded="false"
               aria-haspopup="true"
-              aria-label="账号菜单"
+              aria-label={m.accountMenu}
             >
               {user.avatar ? (
                 <div class="relative h-8 w-8 shrink-0">
@@ -95,8 +151,8 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
               role="menu"
             >
               <p class="px-3 py-2 text-xs text-gray-500 border-b border-border truncate" title={user.name || user.username}>{user.name || user.username}</p>
-              <button type="button" id="navLogoutBtn" class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-surface-secondary cursor-pointer" role="menuitem">
-                退出登录
+              <button type="button" id="navLogoutBtn" data-home={homeHref} class="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-surface-secondary cursor-pointer" role="menuitem">
+                {m.logout}
               </button>
             </div>
           </div>
@@ -109,7 +165,7 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
               aria-expanded="false"
               aria-haspopup="true"
             >
-              登录
+              {m.login}
             </button>
             <div
               id="navLoginMenu"
@@ -141,7 +197,7 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
             <a href={site.brandUrl} target="_blank" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">{site.agentName}</a>
           )}
           {site.showBrandLinks && site.docsUrl && (
-            <a href={site.docsUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">文档</a>
+            <a href={site.docsUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">{m.footerDocs}</a>
           )}
           {site.githubUrl && (
             <a href={site.githubUrl} target="_blank" rel="noopener noreferrer" class="text-sm text-gray-500 hover:text-gray-300 transition-colors">GitHub</a>
@@ -195,7 +251,12 @@ const user = site.showLogin ? (Astro.locals.user ?? null) : null;
       document.getElementById('navLogoutBtn')?.addEventListener('click', async function (e) {
         e.stopPropagation();
         await fetch('/api/auth/logout', { method: 'POST' });
-        window.location.href = '/';
+        window.location.href = this.dataset.home || '/';
+      });
+
+      // Remember an explicit language choice so the server stops auto-detecting.
+      document.getElementById('langSwitch')?.addEventListener('click', function () {
+        document.cookie = this.dataset.cookie + '=' + this.dataset.lang + '; path=/; max-age=31536000; samesite=lax';
       });
     })();
   </script>

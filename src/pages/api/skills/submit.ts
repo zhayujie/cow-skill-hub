@@ -2,9 +2,26 @@ import type { APIRoute } from 'astro';
 import { getDB, getBucket, getAppContext, json, errorResponse } from '../_utils';
 import { buildZip } from '@/lib/build-zip';
 import { FALLBACK_CATALOG_SLUGS } from '@/data/fallback-catalog-slugs';
-import { isValidSubmitSlug } from '@/lib/slug';
+import { isReservedSlug, isValidSubmitSlug } from '@/lib/slug';
 
 const MAX_BODY_CHARS = 5_242_880; // 5 MB JSON text (matches client-side limit)
+
+const CONFLICT_MSG = {
+  zh: {
+    published: '该唯一标识与技能库中已上架技能重复，请更换后再提交。',
+    pending: '该唯一标识已有提交正在审核中，请更换后再提交。',
+    taken: '该唯一标识已被占用，请更换后再提交。',
+    invalidAccount: '账号无效，请重新登录后再试',
+    conflict: '该唯一标识已存在或文件路径冲突，请更换后再提交',
+  },
+  en: {
+    published: 'This unique ID is already used by a published skill. Please choose another one.',
+    pending: 'A submission with this unique ID is already under review. Please choose another one.',
+    taken: 'This unique ID is already taken. Please choose another one.',
+    invalidAccount: 'Invalid account. Please log in again and retry.',
+    conflict: 'This unique ID already exists or file paths conflict. Please choose another one.',
+  },
+};
 
 interface SubmitFile {
   path: string;
@@ -42,12 +59,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
     summary?: string;
     tags?: string[];
     files?: SubmitFile[];
+    lang?: string;
   };
   try {
     body = JSON.parse(bodyText) as typeof body;
   } catch {
     return json({ error: 'Invalid JSON' }, 400);
   }
+  const msg = CONFLICT_MSG[body.lang === 'en' ? 'en' : 'zh'];
 
   const name = typeof body.name === 'string' ? body.name.trim() : '';
   const displayName = typeof body.display_name === 'string' ? body.display_name.trim() : '';
@@ -94,16 +113,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
     .bind(name)
     .first<{ status: string }>();
   if (existingRow?.status === 'published') {
-    return json({ error: '该唯一标识与技能库中已上架技能重复，请更换后再提交。' }, 409);
+    return json({ error: msg.published }, 409);
   }
   if (existingRow?.status === 'pending') {
-    return json({ error: '该唯一标识已有提交正在审核中，请更换后再提交。' }, 409);
+    return json({ error: msg.pending }, 409);
   }
-  if (existingRow?.status) {
-    return json({ error: '该唯一标识已被占用，请更换后再提交。' }, 409);
+  if (existingRow?.status || isReservedSlug(name)) {
+    return json({ error: msg.taken }, 409);
   }
   if (FALLBACK_CATALOG_SLUGS.has(name)) {
-    return json({ error: '该唯一标识与技能库中已上架技能重复，请更换后再提交。' }, 409);
+    return json({ error: msg.published }, 409);
   }
 
   const tagsJson = JSON.stringify(tags);
@@ -170,15 +189,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     } catch {
       /* ignore cleanup errors */
     }
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes('UNIQUE') || msg.includes('constraint') || msg.includes('FOREIGN KEY')) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    if (errMsg.includes('UNIQUE') || errMsg.includes('constraint') || errMsg.includes('FOREIGN KEY')) {
       return json(
         {
-          error: msg.includes('FOREIGN KEY')
-            ? '账号无效，请重新登录后再试'
-            : '该唯一标识已存在或文件路径冲突，请更换后再提交',
+          error: errMsg.includes('FOREIGN KEY') ? msg.invalidAccount : msg.conflict,
         },
-        msg.includes('FOREIGN KEY') ? 400 : 409,
+        errMsg.includes('FOREIGN KEY') ? 400 : 409,
       );
     }
     return errorResponse('submit batch', err);

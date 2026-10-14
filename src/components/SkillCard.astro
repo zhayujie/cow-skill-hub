@@ -1,5 +1,6 @@
 ---
 import type { SkillData } from '@/data/skills';
+import { DEFAULT_LANG, localizePath, t, tagLabel } from '@/i18n';
 
 interface Props {
   skill: SkillData;
@@ -7,10 +8,12 @@ interface Props {
 }
 
 const { skill, tagMap = {} } = Astro.props;
+const lang = Astro.locals.lang ?? DEFAULT_LANG;
+const m = t(lang);
 
 const categoryLabel: Record<string, string> = {
-  community: '社区',
-  external: '三方',
+  community: m.categoryCommunity,
+  external: m.categoryExternalShort,
 };
 
 const categoryColor: Record<string, string> = {
@@ -27,7 +30,7 @@ const providerName = providerLabel[skill.sourceProvider] || '';
 ---
 
 <a
-  href={`/${skill.name}`}
+  href={localizePath(`/${skill.name}`, lang)}
   class="skill-card group flex flex-col h-full bg-surface-card border border-border rounded-2xl p-7 transition-all duration-200 hover:bg-surface-card-hover hover:border-border-light hover:-translate-y-0.5 cursor-pointer"
 >
   <div class="flex items-start justify-between mb-1">
@@ -36,7 +39,7 @@ const providerName = providerLabel[skill.sourceProvider] || '';
     </h3>
     <div class="flex items-center gap-1.5 shrink-0">
       {skill.featured && (
-        <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">推荐</span>
+        <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full border bg-primary/10 text-primary border-primary/20">{m.featured}</span>
       )}
       {skill.category === 'community' && (
         <span class={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${categoryColor[skill.category]}`}>
@@ -46,12 +49,12 @@ const providerName = providerLabel[skill.sourceProvider] || '';
     </div>
   </div>
   <p class="text-xs text-gray-500 font-mono mb-4">
-    <span class="skill-name-copy cursor-pointer hover:text-gray-300 transition-colors" data-name={skill.name} onclick="event.preventDefault();navigator.clipboard.writeText(this.dataset.name);const o=this.textContent;this.textContent='已复制';setTimeout(()=>this.textContent=o,1000)">{skill.name}</span>
+    <span class="skill-name-copy cursor-pointer hover:text-gray-300 transition-colors" data-name={skill.name} data-copied={m.copiedShort} onclick="event.preventDefault();navigator.clipboard.writeText(this.dataset.name);const o=this.textContent;this.textContent=this.dataset.copied;setTimeout(()=>this.textContent=o,1000)">{skill.name}</span>
   </p>
   <p class="text-sm text-gray-300 leading-relaxed mb-5 line-clamp-2 min-h-[2.8em]">{skill.description}</p>
   <div class="flex items-center gap-2 mb-4 flex-wrap min-h-[1.75rem]">
     {skill.tags.slice(0, 3).map(tag => (
-      <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tag}</span>
+      <span class="text-xs text-gray-500 bg-surface-secondary px-2.5 py-1 rounded-full border border-border">{tagMap[tag] || tagLabel(tag, undefined, lang)}</span>
     ))}
   </div>
   <div class="flex items-center justify-between text-xs text-gray-500 mt-auto min-w-0">

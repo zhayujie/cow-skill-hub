@@ -21,5 +21,6 @@ declare namespace App {
       name: string;
       avatar: string;
     } | null;
+    lang: import('./i18n').Lang;
   }
 }

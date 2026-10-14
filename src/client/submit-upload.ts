@@ -1,9 +1,61 @@
 import { unzipSync, strFromU8 } from 'fflate';
 import { parseFrontmatter } from '@/lib/frontmatter';
 import { normalizeSlugInput, slugToDisplayName, isValidSubmitSlug } from '@/lib/slug';
+import { tagLabel } from '@/i18n';
+import type { Lang } from '@/i18n';
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB per file
 const MAX_TOTAL_CHARS = 5 * 1024 * 1024; // 5 MB total text
+
+const LANG: Lang = document.documentElement.lang.toLowerCase().startsWith('en') ? 'en' : 'zh';
+
+const MSG = {
+  zh: {
+    listSep: '、',
+    noSkillMdWithSample: (sample: string, more: boolean) =>
+      `未找到 SKILL.md。当前解析到的路径示例：${sample}${more ? '…' : ''}。请确认包内包含 SKILL.md。`,
+    noSkillMd: '未找到 SKILL.md。请确认压缩包或文件夹内包含 SKILL.md。',
+    skillMdNotAtRoot: (p: string) =>
+      `技能包根目录下必须有 SKILL.md（与同级文件同一层）。当前检测到：${p}。请调整目录结构后重新上传。`,
+    defaultDescription: '由社区提交的技能',
+    folderTooLarge: (mb: string) => `文件夹总大小 ${mb} MB 超过 5 MB 上限，请精简后重试`,
+    folderEmpty: '没有读到有效文件，请重试或换一个文件夹',
+    folderParseFailed: '解析失败，请换浏览器重试或打成 zip 上传',
+    zipTooLarge: (mb: string) => `zip 文件大小 ${mb} MB 超过 5 MB 上限，请精简后重试`,
+    zipUnreadable: '无法解压该 zip，请确认文件完整且未加密',
+    zipEmpty: '压缩包内没有可读文件，或格式不支持',
+    zipParseFailed: '解析失败，请确认是有效的 zip 文件',
+    dropZipOnly: '请拖入 .zip 文件；上传文件夹请使用下方「选择文件夹」',
+    slugHint: '仅小写字母、数字和连字符，2–64 位，不能以连字符开头或结尾',
+    slugInvalid: '唯一标识格式无效：2–64 位，仅小写字母、数字和连字符，且不能以连字符开头或结尾',
+    submitting: '提交中…',
+    submitFailed: '提交失败',
+    networkError: '网络错误',
+  },
+  en: {
+    listSep: ', ',
+    noSkillMdWithSample: (sample: string, more: boolean) =>
+      `SKILL.md not found. Paths detected: ${sample}${more ? '…' : ''}. Make sure the package contains SKILL.md.`,
+    noSkillMd: 'SKILL.md not found. Make sure the zip or folder contains SKILL.md.',
+    skillMdNotAtRoot: (p: string) =>
+      `SKILL.md must be at the root of the package (next to the other files). Detected: ${p}. Please fix the layout and upload again.`,
+    defaultDescription: 'A community-contributed skill',
+    folderTooLarge: (mb: string) => `Folder size ${mb} MB exceeds the 5 MB limit. Please trim it and try again.`,
+    folderEmpty: 'No readable files found. Please try again or choose another folder.',
+    folderParseFailed: 'Parsing failed. Try another browser or upload a zip instead.',
+    zipTooLarge: (mb: string) => `Zip size ${mb} MB exceeds the 5 MB limit. Please trim it and try again.`,
+    zipUnreadable: 'Unable to extract this zip. Make sure it is complete and not encrypted.',
+    zipEmpty: 'The zip contains no readable files, or the format is not supported.',
+    zipParseFailed: 'Parsing failed. Make sure this is a valid zip file.',
+    dropZipOnly: 'Please drop a .zip file. To upload a folder, use "Choose folder" below.',
+    slugHint: 'Lowercase letters, digits and hyphens only, 2–64 chars, no leading or trailing hyphen',
+    slugInvalid:
+      'Invalid unique ID: 2–64 chars, lowercase letters, digits and hyphens only, no leading or trailing hyphen',
+    submitting: 'Submitting…',
+    submitFailed: 'Submission failed',
+    networkError: 'Network error',
+  },
+}[LANG];
 
 /** @type {{ path: string; content: string }[]} */
 let parsedFiles: { path: string; content: string }[] = [];
@@ -67,11 +119,9 @@ function applyParsed(files: { path: string; content: string }[]) {
     const sample = normalized
       .slice(0, 12)
       .map((f) => f.path)
-      .join('、');
+      .join(MSG.listSep);
     showParseError(
-      sample
-        ? `未找到 SKILL.md。当前解析到的路径示例：${sample}${normalized.length > 12 ? '…' : ''}。请确认包内包含 SKILL.md。`
-        : '未找到 SKILL.md。请确认压缩包或文件夹内包含 SKILL.md。',
+      sample ? MSG.noSkillMdWithSample(sample, normalized.length > 12) : MSG.noSkillMd,
     );
     document.getElementById('skillForm')?.classList.add('hidden');
     return;
@@ -80,9 +130,7 @@ function applyParsed(files: { path: string; content: string }[]) {
   const skillPath = normPath(skill.path);
   const atPackageRoot = skillPath.split('/').length === 1 && skillPath.toLowerCase() === 'skill.md';
   if (!atPackageRoot) {
-    showParseError(
-      `技能包根目录下必须有 SKILL.md（与同级文件同一层）。当前检测到：${skillPath}。请调整目录结构后重新上传。`,
-    );
+    showParseError(MSG.skillMdNotAtRoot(skillPath));
     document.getElementById('skillForm')?.classList.add('hidden');
     return;
   }
@@ -102,7 +150,7 @@ function applyParsed(files: { path: string; content: string }[]) {
   const fDesc = document.getElementById('fDesc');
   if (fSlug instanceof HTMLInputElement) fSlug.value = slug;
   if (fDisplay instanceof HTMLInputElement) fDisplay.value = slugToDisplayName(slug);
-  if (fDesc instanceof HTMLTextAreaElement) fDesc.value = (fm.description || '').trim() || '由社区提交的技能';
+  if (fDesc instanceof HTMLTextAreaElement) fDesc.value = (fm.description || '').trim() || MSG.defaultDescription;
   const ul = document.getElementById('fileList');
   if (ul) {
     ul.innerHTML = '';
@@ -127,7 +175,7 @@ async function readDirectoryInput(fileList: FileList) {
     let totalBytes = 0;
     for (let i = 0; i < fileList.length; i++) totalBytes += fileList[i].size;
     if (totalBytes > MAX_FILE_BYTES) {
-      showParseError(`文件夹总大小 ${(totalBytes / 1024 / 1024).toFixed(1)} MB 超过 5 MB 上限，请精简后重试`);
+      showParseError(MSG.folderTooLarge((totalBytes / 1024 / 1024).toFixed(1)));
       return;
     }
 
@@ -142,13 +190,13 @@ async function readDirectoryInput(fileList: FileList) {
       out.push({ path, content: text });
     }
     if (out.length === 0) {
-      showParseError('没有读到有效文件，请重试或换一个文件夹');
+      showParseError(MSG.folderEmpty);
       return;
     }
     applyParsed(out);
   } catch (err) {
     console.error(err);
-    showParseError('解析失败，请换浏览器重试或打成 zip 上传');
+    showParseError(MSG.folderParseFailed);
   } finally {
     setParseLoading(false);
   }
@@ -159,7 +207,7 @@ async function readZipFile(file: File) {
   showParseError('');
   try {
     if (file.size > MAX_FILE_BYTES) {
-      showParseError(`zip 文件大小 ${(file.size / 1024 / 1024).toFixed(1)} MB 超过 5 MB 上限，请精简后重试`);
+      showParseError(MSG.zipTooLarge((file.size / 1024 / 1024).toFixed(1)));
       return;
     }
 
@@ -169,7 +217,7 @@ async function readZipFile(file: File) {
       u = unzipSync(new Uint8Array(buf)) as Record<string, Uint8Array>;
     } catch (e) {
       console.error(e);
-      showParseError('无法解压该 zip，请确认文件完整且未加密');
+      showParseError(MSG.zipUnreadable);
       return;
     }
     const list: { path: string; content: string }[] = [];
@@ -190,13 +238,13 @@ async function readZipFile(file: File) {
       list.push({ path, content: text });
     }
     if (list.length === 0) {
-      showParseError('压缩包内没有可读文件，或格式不支持');
+      showParseError(MSG.zipEmpty);
       return;
     }
     applyParsed(list);
   } catch (err) {
     console.error(err);
-    showParseError('解析失败，请确认是有效的 zip 文件');
+    showParseError(MSG.zipParseFailed);
   } finally {
     setParseLoading(false);
   }
@@ -221,7 +269,7 @@ function wireDropAndInputs() {
     if (!fl?.length) return;
     const f = fl[0];
     if (f.name.toLowerCase().endsWith('.zip')) await readZipFile(f);
-    else showParseError('请拖入 .zip 文件；上传文件夹请使用下方「选择文件夹」');
+    else showParseError(MSG.dropZipOnly);
   });
 
   zipInput?.addEventListener('change', async () => {
@@ -249,8 +297,9 @@ async function loadTags() {
     const tags = data.tags || [];
     for (const t of tags) {
       const id = typeof t === 'object' && t !== null && 'id' in t ? String((t as { id: string }).id) : String(t);
-      const name =
+      const rawName =
         typeof t === 'object' && t !== null && 'name' in t ? String((t as { name: string }).name) : id;
+      const name = tagLabel(id, rawName, LANG);
       const label = document.createElement('label');
       label.className = 'inline-flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer';
       const cb = document.createElement('input');
@@ -284,7 +333,7 @@ function wireFormHandlers() {
     if (isValidSubmitSlug(v)) {
       showSlugHint(true, '');
     } else {
-      showSlugHint(false, '仅小写字母、数字和连字符，2–64 位，不能以连字符开头或结尾');
+      showSlugHint(false, MSG.slugHint);
     }
   });
 
@@ -293,7 +342,7 @@ function wireFormHandlers() {
     if (!(t instanceof HTMLInputElement)) return;
     const n = normalizeSlugInput(t.value);
     if (n !== t.value) t.value = n;
-    if (n) showSlugHint(isValidSubmitSlug(n), isValidSubmitSlug(n) ? '' : '仅小写字母、数字和连字符，2–64 位，不能以连字符开头或结尾');
+    if (n) showSlugHint(isValidSubmitSlug(n), isValidSubmitSlug(n) ? '' : MSG.slugHint);
   });
 
   document.getElementById('skillForm')?.addEventListener('submit', async (e) => {
@@ -310,8 +359,7 @@ function wireFormHandlers() {
     if (!isValidSubmitSlug(name)) {
       msg?.classList.remove('hidden');
       if (msg) {
-        msg.textContent =
-          '唯一标识格式无效：2–64 位，仅小写字母、数字和连字符，且不能以连字符开头或结尾';
+        msg.textContent = MSG.slugInvalid;
         msg.className = 'text-sm text-center text-red-400';
       }
       return;
@@ -323,7 +371,7 @@ function wireFormHandlers() {
 
     const origLabel = btn?.textContent;
     if (btn) btn.disabled = true;
-    if (btn) btn.textContent = '提交中…';
+    if (btn) btn.textContent = MSG.submitting;
     msg?.classList.add('hidden');
 
     try {
@@ -337,13 +385,14 @@ function wireFormHandlers() {
           summary: fDesc.value.trim(),
           tags,
           files: parsedFiles,
+          lang: LANG,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) {
         msg?.classList.remove('hidden');
         if (msg) {
-          msg.textContent = data.error || '提交失败';
+          msg.textContent = data.error || MSG.submitFailed;
           msg.className = 'text-sm text-center text-red-400';
         }
         if (btn) btn.disabled = false;
@@ -357,7 +406,7 @@ function wireFormHandlers() {
     } catch {
       msg?.classList.remove('hidden');
       if (msg) {
-        msg.textContent = '网络错误';
+        msg.textContent = MSG.networkError;
         msg.className = 'text-sm text-center text-red-400';
       }
       if (btn) btn.disabled = false;

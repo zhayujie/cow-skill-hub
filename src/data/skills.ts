@@ -2,6 +2,9 @@ export interface SkillData {
   name: string;
   displayName: string;
   description: string;
+  /** Optional English display name / description; empty falls back to the originals. */
+  displayNameEn?: string;
+  descriptionEn?: string;
   summary: string;
   version: string;
   author: string;
@@ -17,6 +20,8 @@ export interface SkillData {
   sourceProvider: 'cowagent' | 'github' | 'openclaw' | 'clawhub' | 'linkai' | 'community';
   sourceUrl?: string;
   sourcePath?: string;
+  /** Last update date (YYYY-MM-DD), when known. */
+  updatedAt?: string;
   files: SkillFile[];
 }
 
@@ -30,7 +35,7 @@ export const categories = [
   { id: 'all', name: '全部', nameEn: 'All' },
   { id: 'featured', name: '推荐', nameEn: 'Featured' },
   { id: 'community', name: '社区', nameEn: 'Community' },
-  { id: 'external', name: '第三方', nameEn: 'External' },
+  { id: 'external', name: '第三方', nameEn: 'Third-party' },
 ] as const;
 
 export const providers: Record<string, { label: string; color: string }> = {
@@ -396,6 +401,22 @@ function generateMockSkills(): SkillData[] {
     sourceProvider: t.provider,
     files: [],
   }));
+}
+
+/** Return the skill with display name and description in `lang` when available. */
+export function localizeSkill(skill: SkillData, lang: 'zh' | 'en'): SkillData {
+  if (lang !== 'en') return skill;
+  return {
+    ...skill,
+    displayName: skill.displayNameEn?.trim() || skill.displayName,
+    description: skill.descriptionEn?.trim() || skill.description,
+  };
+}
+
+export function getInstallCommand(skill: Pick<SkillData, 'name' | 'sourceProvider'>, cli: string): string {
+  if (skill.sourceProvider === 'clawhub') return `${cli} skill install clawhub:${skill.name}`;
+  if (skill.sourceProvider === 'github') return `${cli} skill install github:${skill.name}`;
+  return `${cli} skill install ${skill.name}`;
 }
 
 export function getSkillByName(name: string): SkillData | undefined {
