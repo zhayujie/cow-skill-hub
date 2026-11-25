@@ -3,8 +3,10 @@ import { json, getDB, getBucket, corsHeaders, isValidSkillName, errorResponse } 
 
 const REGISTRY_PROVIDERS: Record<string, (slug: string) => string> = {
   clawhub: (slug) => {
-    const name = slug.includes('/') ? slug.split('/').pop()! : slug;
-    return `https://wry-manatee-359.convex.site/api/v1/download?slug=${encodeURIComponent(name)}`;
+    const [owner, name] = slug.includes('/') ? slug.split('/').slice(-2) : ['', slug];
+    const url = `https://wry-manatee-359.convex.site/api/v1/download?slug=${encodeURIComponent(name)}`;
+    // ClawHub answers 409 for a slug that several publishers share.
+    return owner ? `${url}&ownerHandle=${encodeURIComponent(owner)}` : url;
   },
   linkai: (slug) => `https://api.link-ai.tech/v1/skill/download?slug=${encodeURIComponent(slug)}`,
 };
@@ -94,7 +96,9 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
         // source_url is a direct zip URL — use it as download link
         const directUrl = (skill.source_url?.startsWith('https://') && skill.source_url?.endsWith('.zip')) ? skill.source_url : null;
-        const downloadUrl = directUrl || resolveRegistryDownloadUrl(skill.source_provider, name!);
+        const ownerSlug = skill.source_provider === 'clawhub' && /^[\w.-]+\/[\w.-]+$/.test(skill.source_url ?? '');
+        const registrySlug = ownerSlug ? skill.source_url : name!;
+        const downloadUrl = directUrl || resolveRegistryDownloadUrl(skill.source_provider, registrySlug);
         if (downloadUrl) {
           return json({
             source_type: 'registry',
